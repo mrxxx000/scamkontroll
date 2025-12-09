@@ -39,9 +39,12 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <button className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <Link 
+            href="/rapportera"
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-md"
+          >
             Rapportera bluff
-          </button>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -68,9 +71,12 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            <button className="mt-2 px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <Link 
+              href="/rapportera"
+              className="mt-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors text-center block"
+            >
               Rapportera bluff
-            </button>
+            </Link>
           </nav>
         </div>
       )}
