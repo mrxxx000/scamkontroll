@@ -33,8 +33,27 @@ export default function RapporteraPage() {
     setSubmitMessage(null);
 
     try {
+      // Normalize phone number on frontend before sending
+      let normalized = reportForm.phoneNumber.trim();
+      
+      // If already has +46, use as-is
+      if (!normalized.startsWith('+46')) {
+        // Remove all non-digits
+        normalized = normalized.replace(/\D/g, '');
+        
+        // If it starts with 46 (without +), add +
+        if (normalized.startsWith('46')) {
+          normalized = '+' + normalized;
+        } else {
+          // Otherwise assume Swedish number and add +46
+          normalized = '+46' + normalized;
+        }
+      }
+      
+      console.log(`📱 Submitting report for: ${reportForm.phoneNumber} → ${normalized}`);
+
       const response = await fetch(
-        'http://localhost:5000/api/numbers/' + encodeURIComponent(reportForm.phoneNumber) + '/report',
+        'http://localhost:5000/api/numbers/' + encodeURIComponent(normalized) + '/report',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -2,13 +2,57 @@ import { supabase } from '../config/supabase';
 
 // Get all reports for a phone number
 export async function getReportsByPhoneNumber(phoneNumber: string) {
+  console.log(`\n========== getReportsByPhoneNumber START ==========`);
+  console.log(`Input: "${phoneNumber}"`);
+  
+  // Simply try to match as-is, with +46, and with wildcard
+  const searches = [
+    phoneNumber,
+    '+46' + phoneNumber.replace(/\D/g, ''),
+    '+' + phoneNumber.replace(/\D/g, ''),
+  ];
+  
+  for (const searchTerm of searches) {
+    console.log(`Trying search: "${searchTerm}"`);
+    
+    const { data, error } = await supabase
+      .from('fraud_reports')
+      .select('*')
+      .eq('phone_number', searchTerm)
+      .order('reported_at', { ascending: false });
+
+    if (error) {
+      console.log(`  Error: ${error.message}`);
+      continue;
+    }
+    
+    if (data && data.length > 0) {
+      console.log(`  ✅ Found ${data.length} reports!`);
+      console.log(`========== getReportsByPhoneNumber END ==========\n`);
+      return data;
+    } else {
+      console.log(`  No match`);
+    }
+  }
+  
+  // Fallback: try wildcard search
+  console.log(`Trying wildcard search...`);
+  const digits = phoneNumber.replace(/\D/g, '');
   const { data, error } = await supabase
     .from('fraud_reports')
     .select('*')
-    .eq('phone_number', phoneNumber)
+    .ilike('phone_number', `%${digits}%`)
     .order('reported_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.log(`  Wildcard error: ${error.message}`);
+  } else if (data && data.length > 0) {
+    console.log(`  ✅ Wildcard found ${data.length} reports!`);
+  } else {
+    console.log(`  Wildcard: No match`);
+  }
+  
+  console.log(`========== getReportsByPhoneNumber END ==========\n`);
   return data || [];
 }
 
@@ -73,10 +117,31 @@ export async function submitFraudReport(
   description: string,
   source = 'user-submitted'
 ) {
+  // Normalize phone number to +46 format
+  let normalized = phoneNumber.trim();
+  
+  // If already has +46, use as-is
+  if (normalized.startsWith('+46')) {
+    // Already normalized
+  } else {
+    // Remove all non-digits
+    normalized = normalized.replace(/\D/g, '');
+    
+    // If it starts with 46 (without +), add +
+    if (normalized.startsWith('46')) {
+      normalized = '+' + normalized;
+    } else {
+      // Otherwise assume Swedish number and add +46
+      normalized = '+46' + normalized;
+    }
+  }
+  
+  console.log(`📱 Normalized phone number: ${phoneNumber} → ${normalized}`);
+  
   const { data, error } = await supabase
     .from('fraud_reports')
     .insert({
-      phone_number: phoneNumber,
+      phone_number: normalized,
       fraud_type: fraudType,
       description,
       source,
@@ -132,11 +197,31 @@ export async function trackSearch(phoneNumber: string) {
   }
 
   try {
+    // Normalize phone number using same logic as submitFraudReport
+    let normalized = phoneNumber.trim();
+    
+    // If already has +46, use as-is
+    if (normalized.startsWith('+46')) {
+      // Already normalized
+    } else {
+      // Remove all non-digits
+      normalized = normalized.replace(/\D/g, '');
+      
+      // If it starts with 46 (without +), add +
+      if (normalized.startsWith('46')) {
+        normalized = '+' + normalized;
+      } else {
+        normalized = '+46' + normalized;
+      }
+    }
+    
+    console.log(`📱 Tracking search - normalized: ${phoneNumber} → ${normalized}`);
+
     // Try to find existing report
     const { data: existing, error: selectError } = await supabase
       .from('fraud_reports')
       .select('*')
-      .eq('phone_number', phoneNumber)
+      .eq('phone_number', normalized)
       .single();
 
     if (existing) {
@@ -144,12 +229,12 @@ export async function trackSearch(phoneNumber: string) {
       const { data: updated, error: updateError } = await supabase
         .from('fraud_reports')
         .update({ search_count: (existing.search_count || 0) + 1 })
-        .eq('phone_number', phoneNumber)
+        .eq('phone_number', normalized)
         .select()
         .single();
 
       if (updateError) throw updateError;
-      console.log(`✅ Tracked search for ${phoneNumber}, new count: ${(existing.search_count || 0) + 1}`);
+      console.log(`✅ Tracked search for ${normalized}, new count: ${(existing.search_count || 0) + 1}`);
       return updated;
     } else {
       // Only log, don't create entry

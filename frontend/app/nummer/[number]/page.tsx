@@ -31,7 +31,8 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
           setReports([]);
         } else {
           setNumberData(data);
-          setReports(data || []);
+          // Extract reports array from response
+          setReports(data.reports || []);
         }
       } catch (err) {
         console.error('Error fetching number:', err);
@@ -52,8 +53,25 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
     setSubmitSuccess(false);
 
     try {
-      const phoneWithFormat = phone.replace(/\D/g, '');
-      const result = await submitReport(`+46${phoneWithFormat}`, formData.category, formData.message);
+      // Normalize phone number - use same logic as rapportera page
+      let normalized = phone.trim();
+      
+      // If already has +46, use as-is
+      if (!normalized.startsWith('+46')) {
+        // Remove all non-digits
+        normalized = normalized.replace(/\D/g, '');
+        
+        // If it starts with 46 (without +), add +
+        if (normalized.startsWith('46')) {
+          normalized = '+' + normalized;
+        } else {
+          // Otherwise assume Swedish number and add +46
+          normalized = '+46' + normalized;
+        }
+      }
+      
+      console.log(`📱 Submitting report from detail page: ${phone} → ${normalized}`);
+      const result = await submitReport(normalized, formData.category, formData.message);
       
       if (!result) throw new Error('Failed to submit report');
 
@@ -203,19 +221,15 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
                             <AlertTriangle className="h-5 w-5" />
                           </div>
                           <div>
-                            <div className="font-semibold text-foreground">{report.category}</div>
+                            <div className="font-semibold text-foreground">{report.fraud_type || report.category}</div>
                             <div className="text-sm text-gray-500 flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {formatDate(report.created_at)}
+                              {formatDate(report.reported_at || report.created_at)}
                             </div>
                           </div>
                         </div>
-                        <button className="flex items-center gap-2 px-3 py-1 rounded-full hover:bg-blue-50 text-blue-600 transition-colors">
-                          <ThumbsUp className="h-4 w-4" />
-                          <span className="text-sm font-medium">{report.likes || 0}</span>
-                        </button>
                       </div>
-                      <p className="text-gray-700 text-sm leading-relaxed">{report.message}</p>
+                      <p className="text-gray-700 text-sm leading-relaxed">{report.description || report.message}</p>
                     </div>
                   ))}
                 </div>

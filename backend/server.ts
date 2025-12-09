@@ -88,13 +88,15 @@ app.get('/api/numbers/search', async (req: Request, res: Response) => {
 app.get('/api/numbers/:phone', async (req: Request, res: Response) => {
   try {
     const { phone } = req.params;
-    console.log(`📞 Fetching details for phone: ${phone}`);
+    console.log(`\n📞 ROUTE: /api/numbers/:phone`);
+    console.log(`📞 Fetching details for phone: "${phone}" (length: ${phone.length})`);
 
     // Track the search
     await trackSearch(phone);
 
+    console.log(`📞 Calling getReportsByPhoneNumber...`);
     const reports = await getReportsByPhoneNumber(phone);
-    console.log(`📊 Found ${reports.length} reports for ${phone}`);
+    console.log(`📊 Found ${reports.length} reports for ${phone}\n`);
 
     res.json({
       phone_number: phone,
@@ -112,6 +114,8 @@ app.post('/api/numbers/:phone/report', async (req: Request, res: Response) => {
   try {
     const { phone } = req.params;
     const { category, message } = req.body;
+
+    console.log(`📝 Report submission for phone: "${phone}" (length: ${phone.length})`);
 
     if (!category || !message) {
       return res.status(400).json({ error: 'Missing required fields' });
