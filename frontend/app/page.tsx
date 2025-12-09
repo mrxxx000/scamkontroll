@@ -351,6 +351,31 @@ const MostSearchedNumbers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Get background color based on search count
+  const getSearchColorClass = (searchCount: number) => {
+    if (searchCount >= 15) return 'bg-red-100 border-red-200 hover:shadow-lg hover:shadow-red-200/50';
+    if (searchCount >= 10) return 'bg-orange-100 border-orange-200 hover:shadow-lg hover:shadow-orange-200/50';
+    if (searchCount >= 5) return 'bg-yellow-100 border-yellow-200 hover:shadow-lg hover:shadow-yellow-200/50';
+    if (searchCount >= 1) return 'bg-blue-100 border-blue-200 hover:shadow-lg hover:shadow-blue-200/50';
+    return 'bg-gray-100 border-gray-200 hover:shadow-md';
+  };
+
+  const getSearchTextColor = (searchCount: number) => {
+    if (searchCount >= 15) return 'text-red-700';
+    if (searchCount >= 10) return 'text-orange-700';
+    if (searchCount >= 5) return 'text-yellow-700';
+    if (searchCount >= 1) return 'text-blue-700';
+    return 'text-gray-600';
+  };
+
+  const getRankBadgeColor = (searchCount: number) => {
+    if (searchCount >= 15) return 'bg-red-600 text-white';
+    if (searchCount >= 10) return 'bg-orange-600 text-white';
+    if (searchCount >= 5) return 'bg-yellow-600 text-white';
+    if (searchCount >= 1) return 'bg-blue-600 text-white';
+    return 'bg-gray-400 text-white';
+  };
+
   useEffect(() => {
     const fetchMostSearched = async () => {
       try {
@@ -402,16 +427,16 @@ const MostSearchedNumbers = () => {
                 <a
                   key={`${item.id}-${index}`}
                   href={`/nummer/${phone.replace(/\D/g, '')}`}
-                  className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
+                  className={`group flex items-center gap-4 p-4 rounded-xl border ${getSearchColorClass(searches)} bg-white hover:shadow-md transition-all duration-200`}
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-sm font-bold shrink-0">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${getRankBadgeColor(searches)} text-sm font-bold shrink-0`}>
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-mono font-semibold text-foreground group-hover:text-blue-600 transition-colors">
                       {phone}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className={`flex items-center gap-2 text-sm font-semibold ${getSearchTextColor(searches)}`}>
                       <Search className="h-3 w-3" />
                       <span>{searches.toLocaleString('sv-SE')} sökningar</span>
                     </div>
