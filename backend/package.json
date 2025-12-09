@@ -1,0 +1,23 @@
+{
+  "name": "scamkontroll-backend",
+  "version": "1.0.0",
+  "description": "Scamkontroll Backend API",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "ts-node server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20",
+    "ts-node": "^10.9.1",
+    "typescript": "^5"
+  }
+}
