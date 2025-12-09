@@ -555,14 +555,14 @@ const WarningsSection = () => {
       description: 'Polisen varnar för en kraftig ökning av falska SMS som utger sig för att vara från PostNord. Klicka aldrig på länkar i SMS.',
       date: '9 december 2025',
       source: 'Polisen',
-      link: '#',
+      link: 'https://www.postnord.se/om-oss/nyheter-press-och-artiklar/2025/varannan-svensk-har-utsatts-for-digitala-bedrageriforsok/',
     },
     {
       title: 'BankID-bedrägerier ökar dramatiskt',
       description: 'Signera aldrig med BankID om någon ringer och påstår sig vara från banken. Banker ber aldrig om detta.',
       date: '8 december 2025',
       source: 'Bankföreningen',
-      link: '#',
+      link: 'https://support.bankid.com/sv/sakerhet/vanliga-bedragerier',
     },
   ];
 
@@ -591,10 +591,15 @@ const WarningsSection = () => {
                     <span className="text-blue-600 font-medium">{warning.source}</span>
                   </div>
                 </div>
-                <button className="shrink-0 px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                <a 
+                  href={warning.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-blue-600 hover:text-blue-700 hover:border-blue-300"
+                >
                   Läs mer
                   <ExternalLink className="h-4 w-4 ml-2 inline" />
-                </button>
+                </a>
               </div>
             </div>
           ))}

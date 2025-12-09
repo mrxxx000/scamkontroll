@@ -14,7 +14,7 @@ export default function Footer() {
               <span className="text-xl font-bold">Scamkontroll</span>
             </Link>
             <p className="text-sm text-gray-600">
-              Sveriges största databas för att identifiera och rapportera bluffnummer och bedrägerier.
+              Identifiera och rapportera bluffnummer och bedrägerier.
             </p>
           </div>
 
