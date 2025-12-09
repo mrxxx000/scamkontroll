@@ -216,6 +216,15 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
               </div>
             </div>
 
+            {/* Disclaimer */}
+            <div className="mb-8 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
+              <p>
+                <strong>Observera:</strong> Informationen på denna sida är baserad på användarrapporter och offentliga källor.
+                Den är inte 100 % korrekt och vissa nummer kan vara felaktigt markerade.
+                Gör alltid en egen bedömning och lämna aldrig ut känsliga uppgifter.
+              </p>
+            </div>
+
             {/* Reports Section */}
             <div className="mb-12">
               <h2 className="text-2xl font-bold mb-6">
