@@ -1,8 +1,12 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { getAllFraudTypes, getFraudType } from './api/fraudTypes';
-import { getPhoneNumber, searchPhoneNumbers, addReport } from './api/phoneNumbers';
-import { createContact } from './api/contacts';
+import dotenv from 'dotenv';
+import { testConnection } from './config/supabase';
+import { getAllFraudTypes, getFraudType } from './api/fraudTypesSupabase';
+import { getPhoneNumber, searchPhoneNumbers, addReport } from './api/phoneNumbersSupabase';
+import { createContact } from './api/contactsSupabase';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -62,13 +66,13 @@ app.get('/api/phone-numbers', async (req: Request, res: Response) => {
 
 app.post('/api/phone-numbers', async (req: Request, res: Response) => {
   try {
-    const { phoneNumberId, content, author } = req.body;
+    const { number, content, author } = req.body;
 
-    if (!phoneNumberId || !content) {
+    if (!number || !content) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const report = await addReport(phoneNumberId, content, author || 'Anonymous');
+    const report = await addReport(number, { content, author: author || 'Anonymous' });
     res.status(201).json(report);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -80,11 +84,11 @@ app.post('/api/contacts', async (req: Request, res: Response) => {
   try {
     const { name, email, subject, message } = req.body;
 
-    if (!name || !email || !subject || !message) {
+    if (!name || !email || !message) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const contact = await createContact(name, email, subject, message);
+    const contact = await createContact({ name, email, subject, message });
     res.status(201).json(contact);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -92,7 +96,20 @@ app.post('/api/contacts', async (req: Request, res: Response) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`✓ Backend server running on http://localhost:${PORT}`);
-  console.log(`✓ Health check: http://localhost:${PORT}/health`);
-});
+const startServer = async () => {
+  try {
+    // Test Supabase connection
+    const connected = await testConnection();
+    
+    app.listen(PORT, () => {
+      console.log(`✓ Backend server running on http://localhost:${PORT}`);
+      console.log(`✓ Health check: http://localhost:${PORT}/health`);
+      if (connected) console.log(`✓ Supabase connected and ready`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();

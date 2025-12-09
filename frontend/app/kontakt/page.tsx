@@ -7,12 +7,37 @@ import Footer from '@/components/Footer';
 
 export default function Kontakt() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    alert('Tack för ditt meddelande! Vi kommer att svara så snart som möjligt.');
-    setFormData({ name: '', email: '', message: '' });
+    setIsLoading(true);
+    setSuccessMessage('');
+    setErrorMessage('');
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to submit form');
+      
+      setSuccessMessage('Tack för ditt meddelande! Vi kommer att svara så snart som möjligt.');
+      setFormData({ name: '', email: '', message: '' });
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Ett fel uppstod');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -73,6 +98,18 @@ export default function Kontakt() {
             <div>
               <h2 className="text-2xl font-bold mb-6">Skicka ett meddelande</h2>
               
+              {successMessage && (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
+                  {successMessage}
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                  Fel: {errorMessage}
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold mb-2">Namn</label>
@@ -109,9 +146,10 @@ export default function Kontakt() {
 
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+                  disabled={isLoading}
+                  className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
                 >
-                  Skicka meddelande
+                  {isLoading ? 'Skickar...' : 'Skicka meddelande'}
                 </button>
               </form>
             </div>
