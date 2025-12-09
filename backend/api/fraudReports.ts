@@ -221,26 +221,32 @@ export async function trackSearch(phoneNumber: string) {
     const { data: existing, error: selectError } = await supabase
       .from('fraud_reports')
       .select('*')
-      .eq('phone_number', normalized)
-      .single();
+      .eq('phone_number', normalized);
 
-    if (existing) {
-      // Update search_count
-      const { data: updated, error: updateError } = await supabase
-        .from('fraud_reports')
-        .update({ search_count: (existing.search_count || 0) + 1 })
-        .eq('phone_number', normalized)
-        .select()
-        .single();
-
-      if (updateError) throw updateError;
-      console.log(`✅ Tracked search for ${normalized}, new count: ${(existing.search_count || 0) + 1}`);
-      return updated;
-    } else {
-      // Only log, don't create entry
-      console.log(`ℹ️  Number ${phoneNumber} not found in database, not creating entry`);
+    if (selectError) {
+      console.error('❌ Error fetching reports:', selectError);
       return null;
     }
+
+    if (!existing || existing.length === 0) {
+      console.log(`ℹ️  No reports found for ${normalized}, not tracking search`);
+      return null;
+    }
+
+    // Update ALL reports for this phone number - increment their search_count
+    const newSearchCount = (existing[0].search_count || 0) + 1;
+    const { error: updateError } = await supabase
+      .from('fraud_reports')
+      .update({ search_count: newSearchCount })
+      .eq('phone_number', normalized);
+
+    if (updateError) {
+      console.error('❌ Error updating search count:', updateError);
+      throw updateError;
+    }
+
+    console.log(`✅ Tracked search for ${normalized}, new count: ${newSearchCount} (updated ${existing.length} reports)`);
+    return existing[0]; // Return first report as representative
   } catch (error) {
     console.error('Error tracking search:', error);
     return null;

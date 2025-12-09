@@ -109,6 +109,20 @@ const LatestScams = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Calculate risk percentage based on search count
+  const calculateRiskPercentage = (searchCount: number) => {
+    if (searchCount === 0) return 0;
+    return Math.min(95, Math.round(searchCount * 4.25));
+  };
+
+  const getRiskColorClass = (percentage: number) => {
+    if (percentage >= 80) return 'bg-red-100 text-red-700 border-red-200';
+    if (percentage >= 60) return 'bg-orange-100 text-orange-700 border-orange-200';
+    if (percentage >= 40) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    if (percentage >= 20) return 'bg-blue-100 text-blue-700 border-blue-200';
+    return 'bg-green-100 text-green-700 border-green-200';
+  };
+
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -203,6 +217,11 @@ const LatestScams = () => {
                           <span className="px-3 py-1 rounded-full text-xs font-medium border bg-red-100 text-red-700 border-red-200">
                             {fraudType}
                           </span>
+                          {report.search_count !== undefined && (
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getRiskColorClass(calculateRiskPercentage(report.search_count))}`}>
+                              Risknivå: {calculateRiskPercentage(report.search_count)}%
+                            </span>
+                          )}
                         </div>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-1">{description}</p>
                       </div>

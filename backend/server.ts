@@ -122,14 +122,20 @@ app.get('/api/numbers/:phone', async (req: Request, res: Response) => {
     console.log(`📞 Fetching details for phone: "${phone}" (length: ${phone.length})`);
 
     // Track the search
+    console.log(`📞 Before trackSearch: calling with phone "${phone}"`);
     await trackSearch(phone);
+    console.log(`📞 After trackSearch`);
 
     console.log(`📞 Calling getReportsByPhoneNumber...`);
     const reports = await getReportsByPhoneNumber(phone);
-    console.log(`📊 Found ${reports.length} reports for ${phone}\n`);
+    console.log(`📊 Found ${reports.length} reports for ${phone}`);
+    if (reports.length > 0) {
+      console.log(`📊 First report search_count: ${reports[0].search_count}`);
+    }
 
-    // Get search count from first report (all reports for same number have same search_count)
+    // Get search count from first report (all reports for same number have same search_count now)
     const search_count = reports.length > 0 ? reports[0].search_count || 0 : 0;
+    console.log(`📊 Using search_count: ${search_count}\n`);
     
     // Calculate risk based on search count
     const { level: risk_level, percentage: risk_percentage } = calculateRiskLevel(search_count);
