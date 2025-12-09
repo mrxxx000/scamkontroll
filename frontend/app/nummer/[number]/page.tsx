@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { AlertTriangle, Phone, Clock, ThumbsUp, SendHorizontal, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { fetchPhoneNumber, submitReport } from '@/lib/api';
 
-export default function NumberPage({ params }: { params: { number: string } }) {
-  const phone = params.number;
+export default function NumberPage({ params }: { params: Promise<{ number: string }> }) {
+  const { number } = use(params);
+  const phone = number;
   const [numberData, setNumberData] = useState<any>(null);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
