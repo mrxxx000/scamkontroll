@@ -282,13 +282,21 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Välj en typ...</option>
-                    <option value="PostNord bluff">PostNord bluff</option>
-                    <option value="BankID signering">BankID signering</option>
-                    <option value="Skatteverket bluff">Skatteverket bluff</option>
-                    <option value="Försäkringskassan bluff">Försäkringskassan bluff</option>
-                    <option value="Vishing (telefonbedrägerier)">Vishing (telefonbedrägerier)</option>
-                    <option value="Phishing (nätfiske)">Phishing (nätfiske)</option>
-                    <option value="Annan">Annan</option>
+                    <option value="PostNord Bluff">PostNord Bluff</option>
+                    <option value="BankID-bedrägeri">BankID-bedrägeri</option>
+                    <option value="Vishing (telefonbedrägeri)">Vishing (telefonbedrägeri)</option>
+                    <option value="Smishing (SMS-bedrägeri)">Smishing (SMS-bedrägeri)</option>
+                    <option value="Kodkapning">Kodkapning</option>
+                    <option value="Phishing / falska länkar">Phishing / falska länkar</option>
+                    <option value="Investeringsbedrägeri">Investeringsbedrägeri</option>
+                    <option value="Tech-support-bedrägeri">Tech-support-bedrägeri</option>
+                    <option value="Blocket / Marketplace-bedrägeri">Blocket / Marketplace-bedrägeri</option>
+                    <option value="Vinstbedrägeri">Vinstbedrägeri</option>
+                    <option value="Fakturabedrägeri">Fakturabedrägeri</option>
+                    <option value="Romance scam">Romance scam</option>
+                    <option value="Jobb- eller hyresbedrägeri">Jobb- eller hyresbedrägeri</option>
+                    <option value="Identitetsstöld">Identitetsstöld</option>
+                    <option value="Ping call / Wangiri">Ping call / Wangiri</option>
                   </select>
                 </div>
 

@@ -178,6 +178,15 @@ const LatestScams = () => {
           </div>
         </div>
 
+        {/* Disclaimer */}
+        <div className="mb-8 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
+          <p>
+            <strong>Observera:</strong> Informationen på denna sida är baserad på användarrapporter och offentliga källor.
+            Den är inte 100 % korrekt och vissa nummer kan vara felaktigt markerade.
+            Gör alltid en egen bedömning och lämna aldrig ut känsliga uppgifter.
+          </p>
+        </div>
+
         {loading && (
           <div className="text-center py-12">
             <div className="inline-flex items-center gap-2 text-gray-600">
@@ -281,6 +290,15 @@ const PopularScamNumbers = () => {
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">Mest sökta bluffnummer</h2>
           <p className="text-gray-600 mt-2">Nummer som svenskar söker på mest just nu</p>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mb-8 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
+          <p>
+            <strong>Observera:</strong> Informationen på denna sida är baserad på användarrapporter och offentliga källor.
+            Den är inte 100 % korrekt och vissa nummer kan vara felaktigt markerade.
+            Gör alltid en egen bedömning och lämna aldrig ut känsliga uppgifter.
+          </p>
         </div>
 
         {loading && (
@@ -400,6 +418,15 @@ const MostSearchedNumbers = () => {
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">Mest sökta bluffnummer</h2>
           <p className="text-gray-600 mt-2">Nummer som användare söker på mest</p>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mb-8 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
+          <p>
+            <strong>Observera:</strong> Informationen på denna sida är baserad på användarrapporter och offentliga källor.
+            Den är inte 100 % korrekt och vissa nummer kan vara felaktigt markerade.
+            Gör alltid en egen bedömning och lämna aldrig ut känsliga uppgifter.
+          </p>
         </div>
 
         {loading && (

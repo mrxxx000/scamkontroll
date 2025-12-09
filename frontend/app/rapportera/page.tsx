@@ -14,17 +14,21 @@ export default function RapporteraPage() {
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fraudCategories = [
-    'Phishing-SMS',
-    'Bankbedrägeri',
-    'Jobbbluff',
-    'Lotteribedrägeri',
-    'Romansbedrägeri',
-    'Tech-support-bluff',
-    'Investeringsbluff',
-    'Myndighetsbluff',
-    'Leveransbluff',
-    'Falsk kundsupport',
-    'Annat',
+    'PostNord Bluff',
+    'BankID-bedrägeri',
+    'Vishing (telefonbedrägeri)',
+    'Smishing (SMS-bedrägeri)',
+    'Kodkapning',
+    'Phishing / falska länkar',
+    'Investeringsbedrägeri',
+    'Tech-support-bedrägeri',
+    'Blocket / Marketplace-bedrägeri',
+    'Vinstbedrägeri',
+    'Fakturabedrägeri',
+    'Romance scam',
+    'Jobb- eller hyresbedrägeri',
+    'Identitetsstöld',
+    'Ping call / Wangiri',
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
