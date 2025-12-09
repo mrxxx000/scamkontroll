@@ -21,6 +21,36 @@ import {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Calculate risk level and percentage based on search count
+function calculateRiskLevel(searchCount: number): { level: string; percentage: number } {
+  // Risk percentage increases linearly with search count
+  // 0 searches = 0% (LOW)
+  // 5 searches = 25% (LOW-MEDIUM)
+  // 10 searches = 50% (MEDIUM)
+  // 15 searches = 75% (MEDIUM-HIGH)
+  // 20 searches = 85% (HIGH)
+  // Caps at 95% (never 100%)
+  
+  if (searchCount === 0) {
+    return { level: 'LOW', percentage: 0 };
+  }
+  
+  // Linear scaling: percentage = min(95, searchCount * 4.25)
+  // At 20 searches: 20 * 4.25 = 85%
+  // At 22 searches: 22 * 4.25 = 93.5% ≈ 94%
+  // At 23+ searches: caps at 95%
+  const percentage = Math.min(95, Math.round(searchCount * 4.25));
+  
+  let level = 'LOW';
+  if (percentage >= 75) {
+    level = 'HIGH';
+  } else if (percentage >= 50) {
+    level = 'MEDIUM';
+  }
+  
+  return { level, percentage };
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -98,9 +128,22 @@ app.get('/api/numbers/:phone', async (req: Request, res: Response) => {
     const reports = await getReportsByPhoneNumber(phone);
     console.log(`📊 Found ${reports.length} reports for ${phone}\n`);
 
+    // Get search count from first report (all reports for same number have same search_count)
+    const search_count = reports.length > 0 ? reports[0].search_count || 0 : 0;
+    
+    // Calculate risk based on search count
+    const { level: risk_level, percentage: risk_percentage } = calculateRiskLevel(search_count);
+    
+    // Get last reported date from first report (most recent)
+    const last_reported_at = reports.length > 0 ? reports[0].reported_at : null;
+
     res.json({
       phone_number: phone,
       total_reports: reports.length,
+      search_count,
+      risk_level,
+      risk_percentage,
+      last_reported_at,
       reports,
     });
   } catch (error) {

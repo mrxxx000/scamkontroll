@@ -90,17 +90,14 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
     }
   };
 
-  const getRiskLevelColor = (riskLevel: string) => {
-    switch (riskLevel) {
-      case 'HIGH':
-        return 'bg-red-100 text-red-800 border-red-300';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'LOW':
-        return 'bg-green-100 text-green-800 border-green-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
+  const getRiskLevelColor = (percentage: number | undefined) => {
+    if (percentage === undefined) return 'bg-gray-100 text-gray-800 border-gray-300';
+    
+    if (percentage >= 80) return 'bg-red-100 text-red-800 border-red-300';
+    if (percentage >= 60) return 'bg-orange-100 text-orange-800 border-orange-300';
+    if (percentage >= 40) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+    if (percentage >= 20) return 'bg-blue-100 text-blue-800 border-blue-300';
+    return 'bg-green-100 text-green-800 border-green-300';
   };
 
   const getRiskLevelLabel = (riskLevel: string) => {
@@ -114,6 +111,16 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
       default:
         return 'Okänd';
     }
+  };
+
+  const getRiskColorByPercentage = (percentage: number | undefined) => {
+    if (percentage === undefined) return 'text-gray-600';
+    
+    if (percentage >= 80) return 'text-red-700 font-bold'; // Very high risk
+    if (percentage >= 60) return 'text-orange-600 font-semibold'; // High risk
+    if (percentage >= 40) return 'text-yellow-600 font-semibold'; // Medium risk
+    if (percentage >= 20) return 'text-blue-600'; // Low-medium risk
+    return 'text-green-600'; // Low risk
   };
 
   const formatDate = (dateString: string) => {
@@ -171,7 +178,7 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
         {numberData && !loading && (
           <div className="container mx-auto px-4 py-8">
             {/* Header Card */}
-            <div className={`rounded-xl border p-6 mb-8 ${getRiskLevelColor(numberData.risk_level)}`}>
+            <div className={`rounded-xl border p-6 mb-8 ${getRiskLevelColor(numberData.risk_percentage)}`}>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="text-sm font-medium opacity-75">Telefonnummer</div>
@@ -179,7 +186,14 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-medium opacity-75">Risknivå</div>
-                  <div className="text-2xl font-bold mt-2">{getRiskLevelLabel(numberData.risk_level)}</div>
+                  <div className="text-2xl font-bold mt-2 flex items-center justify-end gap-3">
+                    <span>{getRiskLevelLabel(numberData.risk_level)}</span>
+                    {numberData.risk_percentage !== undefined && (
+                      <span className={`text-xl font-bold ${getRiskColorByPercentage(numberData.risk_percentage)}`}>
+                        {numberData.risk_percentage}%
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
