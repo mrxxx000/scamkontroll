@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Search, Shield, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { fetchLatestReports } from '@/lib/api';
 
 // Hero Section Component
 const HeroSection = () => {
@@ -111,10 +112,14 @@ const LatestScams = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const res = await fetch('/api/latest-reports?limit=10');
-        if (!res.ok) throw new Error('Failed to fetch reports');
-        const data = await res.json();
-        setReports(data);
+        console.log('📱 LatestScams: Fetching data...');
+        const data = await fetchLatestReports(10);
+        console.log('📱 LatestScams: Got', data?.length, 'reports');
+        console.log('📱 LatestScams: Data:', data);
+        if (!data || data.length === 0) {
+          setError('No reports found');
+        }
+        setReports(data || []);
       } catch (err) {
         console.error('Error fetching reports:', err);
         setError('Could not load latest reports');
@@ -126,32 +131,27 @@ const LatestScams = () => {
     fetchReports();
   }, []);
 
-  const getRiskLevelColor = (riskLevel: string) => {
-    switch (riskLevel) {
-      case 'HIGH':
-        return 'bg-red-100 text-red-700 border-red-200';
-      case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'LOW':
-        return 'bg-green-100 text-green-700 border-green-200';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
-  };
-
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+    try {
+      // Handle ISO format "2025-02-14T11:55:00"
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Okänt datum';
+      }
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'just nu';
-    if (diffMins < 60) return `${diffMins} min sedan`;
-    if (diffHours < 24) return `${diffHours} timmar sedan`;
-    if (diffDays === 1) return '1 dag sedan';
-    return `${diffDays} dagar sedan`;
+      if (diffMins < 1) return 'just nu';
+      if (diffMins < 60) return `${diffMins} min sedan`;
+      if (diffHours < 24) return `${diffHours} timmar sedan`;
+      if (diffDays === 1) return '1 dag sedan';
+      return `${diffDays} dagar sedan`;
+    } catch {
+      return 'Okänt datum';
+    }
   };
 
   return (
@@ -182,9 +182,9 @@ const LatestScams = () => {
         {!loading && reports.length > 0 && (
           <div className="grid gap-4">
             {reports.map((report: any, index: number) => {
-              const phone = report.numbers?.phone || 'Okänt nummer';
-              const riskLevel = report.numbers?.risk_level || 'LOW';
-              const totalReports = report.numbers?.total_reports || 0;
+              const phone = report.phone_number || 'Okänt nummer';
+              const fraudType = report.fraud_type || 'Okänd typ';
+              const description = report.description || '';
 
               return (
                 <a
@@ -199,23 +199,19 @@ const LatestScams = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <span className="font-mono font-semibold text-foreground">+46{phone}</span>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getRiskLevelColor(riskLevel)}`}>
-                            {report.category}
+                          <span className="font-mono font-semibold text-foreground">{phone}</span>
+                          <span className="px-3 py-1 rounded-full text-xs font-medium border bg-red-100 text-red-700 border-red-200">
+                            {fraudType}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-1">{report.message}</p>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-1">{description}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-6 text-sm text-gray-600">
                       <div className="flex items-center gap-1.5">
-                        <Phone className="h-4 w-4" />
-                        <span>{totalReports} rapporter</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
                         <Clock className="h-4 w-4" />
-                        <span>{formatDate(report.created_at)}</span>
+                        <span>{formatDate(report.reported_at)}</span>
                       </div>
                       <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                     </div>

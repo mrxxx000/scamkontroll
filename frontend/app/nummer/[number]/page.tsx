@@ -5,6 +5,7 @@ import { AlertTriangle, Phone, Clock, ThumbsUp, SendHorizontal, ArrowLeft } from
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { fetchPhoneNumber, submitReport } from '@/lib/api';
 
 export default function NumberPage({ params }: { params: { number: string } }) {
   const phone = params.number;
@@ -20,14 +21,21 @@ export default function NumberPage({ params }: { params: { number: string } }) {
   useEffect(() => {
     const fetchNumberData = async () => {
       try {
-        const res = await fetch(`/api/search?phone=${phone}`);
-        if (!res.ok) throw new Error('Failed to fetch number details');
-        const data = await res.json();
-        setNumberData(data);
-        setReports(data.reports || []);
+        console.log('🔍 Fetching phone number data for:', phone);
+        const data = await fetchPhoneNumber(phone);
+        console.log('✅ Received phone data:', data);
+        
+        if (!data) {
+          setError('Telefonnumret hittades inte');
+          setReports([]);
+        } else {
+          setNumberData(data);
+          setReports(data || []);
+        }
       } catch (err) {
         console.error('Error fetching number:', err);
-        setError('Could not load number details');
+        setError('Kunde inte ladda telefonnumrets detaljer');
+        setReports([]);
       } finally {
         setLoading(false);
       }
@@ -43,28 +51,21 @@ export default function NumberPage({ params }: { params: { number: string } }) {
     setSubmitSuccess(false);
 
     try {
-      const res = await fetch('/api/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          phone,
-          category: formData.category,
-          message: formData.message,
-        }),
-      });
-
-      if (!res.ok) throw new Error('Failed to submit report');
+      const phoneWithFormat = phone.replace(/\D/g, '');
+      const result = await submitReport(`+46${phoneWithFormat}`, formData.category, formData.message);
+      
+      if (!result) throw new Error('Failed to submit report');
 
       setFormData({ category: '', message: '' });
       setSubmitSuccess(true);
 
-      // Refresh reports
+      // Refresh reports after 2 seconds
       setTimeout(() => {
         window.location.reload();
       }, 2000);
     } catch (err) {
       console.error('Error submitting report:', err);
-      setSubmitError('Could not submit report. Please try again.');
+      setSubmitError('Kunde inte skicka rapporten. Försök igen.');
     } finally {
       setSubmitting(false);
     }
