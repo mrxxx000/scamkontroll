@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Shield, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink, Menu, X } from 'lucide-react';
+import { getLatestReports, getTrendingNumbers } from '@/lib/api';
 
 // Header Component
 const Header = () => {
@@ -177,55 +178,95 @@ const HeroSection = () => {
 
 // Latest Scams Component
 const LatestScams = () => {
-  const scams = [
-    {
-      id: 1,
-      number: '+46769452000',
-      type: 'PostNord bluff',
-      description: 'SMS om försenat paket med länk till falsk betalningssida',
-      reports: 234,
-      lastReported: '2 timmar sedan',
-      severity: 'high',
-    },
-    {
-      id: 2,
-      number: '+46701234567',
-      type: 'BankID signering',
-      description: 'Uppmanar till att signera med BankID för "säkerhetskontroll"',
-      reports: 156,
-      lastReported: '5 timmar sedan',
-      severity: 'high',
-    },
-    {
-      id: 3,
-      number: '+46761111222',
-      type: 'Skatteverket',
-      description: 'Påstår att du har pengar att få tillbaka, begär kontouppgifter',
-      reports: 89,
-      lastReported: '1 dag sedan',
-      severity: 'medium',
-    },
-    {
-      id: 4,
-      number: '+46731234567',
-      type: 'Försäkringskassan',
-      description: 'Falskt meddelande om utbetalning som kräver verifiering',
-      reports: 67,
-      lastReported: '1 dag sedan',
-      severity: 'medium',
-    },
-  ];
+  const [scams, setScams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getSeverityStyles = (severity: string) => {
-    switch (severity) {
-      case 'high':
-        return 'bg-red-100 text-red-700 border-red-200';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-700';
+  useEffect(() => {
+    const fetchScams = async () => {
+      try {
+        console.log('📱 LatestScams: Fetching data...');
+        const data = await getLatestReports(4);
+        console.log('📱 LatestScams: Got', data?.length, 'scams');
+        console.log('📱 LatestScams: Data:', data);
+        if (!data || data.length === 0) {
+          setError('No data from API - make sure Supabase table is set up!');
+        }
+        setScams(data || []);
+      } catch (error) {
+        console.error('Error loading scams:', error);
+        setError('Failed to load scams');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScams();
+  }, []);
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Okänt datum';
+    try {
+      // Handle format "2025-01-12 10:23:00"
+      const date = new Date(dateString.replace(' ', 'T'));
+      if (isNaN(date.getTime())) {
+        return 'Okänt datum';
+      }
+      return date.toLocaleDateString('sv-SE');
+    } catch {
+      return 'Okänt datum';
     }
   };
+
+  const getSeverityStyles = (reports: number) => {
+    // Estimate severity based on report count
+    if (reports > 100) return 'bg-red-100 text-red-700 border-red-200';
+    if (reports > 50) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    return 'bg-gray-100 text-gray-700';
+  };
+
+  if (loading) {
+    return (
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Senaste rapporterade bluffar</h2>
+              <p className="text-gray-600 mt-2">Nyligen anmälda bedrägeriförsök i Sverige</p>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !scams || scams.length === 0) {
+    return (
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Senaste rapporterade bluffar</h2>
+              <p className="text-gray-600 mt-2">Nyligen anmälda bedrägeriförsök i Sverige</p>
+            </div>
+          </div>
+          <div className="p-8 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+            <p className="text-yellow-800 font-medium">
+              ⚠️ Ingen data ännu
+            </p>
+            <p className="text-yellow-700 text-sm mt-2">
+              Kör SQL-skriptet från <code className="bg-yellow-100 px-2 py-1 rounded">SETUP_DATABASE.md</code> för att fylla databasen.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 md:py-24">
@@ -235,17 +276,13 @@ const LatestScams = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">Senaste rapporterade bluffar</h2>
             <p className="text-gray-600 mt-2">Nyligen anmälda bedrägeriförsök i Sverige</p>
           </div>
-          <a href="/rapporter" className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
-            Visa alla rapporter
-            <ArrowRight className="h-4 w-4" />
-          </a>
         </div>
 
         <div className="grid gap-4">
-          {scams.map((scam, index) => (
+          {scams.map((scam) => (
             <a
               key={scam.id}
-              href={`/nummer/${scam.number.replace(/\D/g, '')}`}
+              href={`/nummer/${scam.phone_number.replace(/\D/g, '')}`}
               className="group block p-4 md:p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200 animate-in fade-in"
             >
               <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -255,9 +292,9 @@ const LatestScams = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-mono font-semibold text-foreground">{scam.number}</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityStyles(scam.severity)}`}>
-                        {scam.type}
+                      <span className="font-mono font-semibold text-foreground">{scam.phone_number}</span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityStyles(1)}`}>
+                        {scam.fraud_type}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mt-1 line-clamp-1">{scam.description}</p>
@@ -266,12 +303,8 @@ const LatestScams = () => {
 
                 <div className="flex items-center gap-6 text-sm text-gray-600">
                   <div className="flex items-center gap-1.5">
-                    <Phone className="h-4 w-4" />
-                    <span>{scam.reports} rapporter</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
                     <Clock className="h-4 w-4" />
-                    <span>{scam.lastReported}</span>
+                    <span>{formatDate(scam.reported_at)}</span>
                   </div>
                   <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                 </div>
@@ -286,14 +319,41 @@ const LatestScams = () => {
 
 // Popular Scam Numbers Component
 const PopularScamNumbers = () => {
-  const popularNumbers = [
-    { number: '+46769452000', searches: 12450, trend: '+23%' },
-    { number: '+46701234567', searches: 8932, trend: '+15%' },
-    { number: '+46761111222', searches: 6543, trend: '+8%' },
-    { number: '+46731234567', searches: 5421, trend: '+12%' },
-    { number: '+46708765432', searches: 4321, trend: '+5%' },
-    { number: '+46723456789', searches: 3210, trend: '+3%' },
-  ];
+  const [trending, setTrending] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const data = await getTrendingNumbers(6);
+        setTrending(data || []);
+      } catch (error) {
+        console.error('Error loading trending:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrending();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-16 md:py-24 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">Mest sökta bluffnummer</h2>
+            <p className="text-gray-600 mt-2">Nummer som svenskar söker på mest just nu</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-20 bg-white rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 md:py-24 bg-gray-50">
@@ -304,10 +364,10 @@ const PopularScamNumbers = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {popularNumbers.map((item, index) => (
+          {trending.map((item: any, index: number) => (
             <a
-              key={item.number}
-              href={`/nummer/${item.number.replace(/\D/g, '')}`}
+              key={item.phone_number}
+              href={`/nummer/${item.phone_number.replace(/\D/g, '')}`}
               className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all duration-200 animate-in fade-in"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-sm font-bold">
@@ -315,11 +375,11 @@ const PopularScamNumbers = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-mono font-semibold text-foreground group-hover:text-blue-600 transition-colors">
-                  {item.number}
+                  {item.phone_number}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Phone className="h-3 w-3" />
-                  <span>{item.searches.toLocaleString('sv-SE')} sökningar</span>
+                  <span>{item.total_reports} rapporter</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 text-sm font-medium text-green-600">

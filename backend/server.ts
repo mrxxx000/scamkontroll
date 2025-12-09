@@ -1,12 +1,20 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { testConnection } from './config/supabase';
-import { getAllFraudTypes, getFraudType } from './api/fraudTypesSupabase';
-import { getPhoneNumber, searchPhoneNumbers, addReport } from './api/phoneNumbersSupabase';
-import { createContact } from './api/contactsSupabase';
 
+// Load environment variables FIRST, before importing supabase
 dotenv.config();
+
+import { testConnection } from './config/supabase';
+import { createContact } from './api/contactsSupabase';
+import {
+  getReportsByPhoneNumber,
+  getLatestReports,
+  getTrendingPhoneNumbers,
+  submitFraudReport,
+  searchFraudReports,
+  getAllPhoneNumbers,
+} from './api/fraudReports';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,61 +28,80 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Backend is running' });
 });
 
-// Fraud Types Routes
-app.get('/api/fraud-types', async (req: Request, res: Response) => {
+// Numbers Routes
+app.get('/api/numbers/:phone', async (req: Request, res: Response) => {
   try {
-    const { slug } = req.query;
+    const { phone } = req.params;
 
-    if (slug && typeof slug === 'string') {
-      const fraudType = await getFraudType(slug);
-      if (!fraudType) {
-        return res.status(404).json({ error: 'Fraud type not found' });
-      }
-      return res.json(fraudType);
-    }
+    const reports = await getReportsByPhoneNumber(phone);
 
-    const fraudTypes = await getAllFraudTypes();
-    res.json(fraudTypes);
+    res.json({
+      phone_number: phone,
+      total_reports: reports.length,
+      reports,
+    });
   } catch (error) {
+    console.error('Error fetching number details:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Phone Numbers Routes
-app.get('/api/phone-numbers', async (req: Request, res: Response) => {
+// Get latest reported scams (for homepage)
+app.get('/api/numbers/reports/latest', async (req: Request, res: Response) => {
   try {
-    const { number, search } = req.query;
-
-    if (number && typeof number === 'string') {
-      const phoneNumber = await getPhoneNumber(number);
-      if (!phoneNumber) {
-        return res.status(404).json({ error: 'Phone number not found' });
-      }
-      return res.json(phoneNumber);
-    }
-
-    if (search && typeof search === 'string') {
-      const results = await searchPhoneNumbers(search);
-      return res.json(results);
-    }
-
-    res.status(400).json({ error: 'Missing query parameters' });
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const reports = await getLatestReports(limit);
+    res.json(reports);
   } catch (error) {
+    console.error('Error fetching latest reports:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/api/phone-numbers', async (req: Request, res: Response) => {
+// Get trending numbers
+app.get('/api/numbers/trending', async (req: Request, res: Response) => {
   try {
-    const { number, content, author } = req.body;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const trending = await getTrendingPhoneNumbers(limit);
+    res.json(trending);
+  } catch (error) {
+    console.error('Error fetching trending numbers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
-    if (!number || !content) {
+// Search phone numbers
+app.get('/api/numbers/search', async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || typeof q !== 'string') {
+      return res.status(400).json({ error: 'Missing search query' });
+    }
+
+    const results = await searchFraudReports(q);
+    res.json(results);
+  } catch (error) {
+    console.error('Error searching numbers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Submit a report for a phone number
+app.post('/api/numbers/:phone/report', async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.params;
+    const { category, message } = req.body;
+
+    if (!category || !message) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const report = await addReport(number, { content, author: author || 'Anonymous' });
+    const report = await submitFraudReport(phone, category, message);
+
     res.status(201).json(report);
   } catch (error) {
+    console.error('Error submitting report:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

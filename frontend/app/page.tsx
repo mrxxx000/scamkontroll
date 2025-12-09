@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Shield, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -104,54 +104,54 @@ const HeroSection = () => {
 
 // Latest Scams Component
 const LatestScams = () => {
-  const scams = [
-    {
-      id: 1,
-      number: '+46769452000',
-      type: 'PostNord bluff',
-      description: 'SMS om försenat paket med länk till falsk betalningssida',
-      reports: 234,
-      lastReported: '2 timmar sedan',
-      severity: 'high',
-    },
-    {
-      id: 2,
-      number: '+46701234567',
-      type: 'BankID signering',
-      description: 'Uppmanar till att signera med BankID för "säkerhetskontroll"',
-      reports: 156,
-      lastReported: '5 timmar sedan',
-      severity: 'high',
-    },
-    {
-      id: 3,
-      number: '+46761111222',
-      type: 'Skatteverket',
-      description: 'Påstår att du har pengar att få tillbaka, begär kontouppgifter',
-      reports: 89,
-      lastReported: '1 dag sedan',
-      severity: 'medium',
-    },
-    {
-      id: 4,
-      number: '+46731234567',
-      type: 'Försäkringskassan',
-      description: 'Falskt meddelande om utbetalning som kräver verifiering',
-      reports: 67,
-      lastReported: '1 dag sedan',
-      severity: 'medium',
-    },
-  ];
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getSeverityStyles = (severity: string) => {
-    switch (severity) {
-      case 'high':
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const res = await fetch('/api/latest-reports?limit=10');
+        if (!res.ok) throw new Error('Failed to fetch reports');
+        const data = await res.json();
+        setReports(data);
+      } catch (err) {
+        console.error('Error fetching reports:', err);
+        setError('Could not load latest reports');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
+
+  const getRiskLevelColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case 'HIGH':
         return 'bg-red-100 text-red-700 border-red-200';
-      case 'medium':
+      case 'MEDIUM':
         return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'LOW':
+        return 'bg-green-100 text-green-700 border-green-200';
       default:
         return 'bg-gray-100 text-gray-700';
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'just nu';
+    if (diffMins < 60) return `${diffMins} min sedan`;
+    if (diffHours < 24) return `${diffHours} timmar sedan`;
+    if (diffDays === 1) return '1 dag sedan';
+    return `${diffDays} dagar sedan`;
   };
 
   return (
@@ -162,50 +162,75 @@ const LatestScams = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">Senaste rapporterade bluffar</h2>
             <p className="text-gray-600 mt-2">Nyligen anmälda bedrägeriförsök i Sverige</p>
           </div>
-          <a href="/rapporter" className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
-            Visa alla rapporter
-            <ArrowRight className="h-4 w-4" />
-          </a>
         </div>
 
-        <div className="grid gap-4">
-          {scams.map((scam) => (
-            <a
-              key={scam.id}
-              href={`/nummer/${scam.number.replace(/\D/g, '')}`}
-              className="group block p-4 md:p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200 animate-in fade-in"
-            >
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
-                    <AlertTriangle className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-mono font-semibold text-foreground">{scam.number}</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityStyles(scam.severity)}`}>
-                        {scam.type}
-                      </span>
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center gap-2 text-gray-600">
+              <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              Laddar rapporter...
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+            {error}
+          </div>
+        )}
+
+        {!loading && reports.length > 0 && (
+          <div className="grid gap-4">
+            {reports.map((report: any, index: number) => {
+              const phone = report.numbers?.phone || 'Okänt nummer';
+              const riskLevel = report.numbers?.risk_level || 'LOW';
+              const totalReports = report.numbers?.total_reports || 0;
+
+              return (
+                <a
+                  key={`${report.id}-${index}`}
+                  href={`/nummer/${phone.replace(/\D/g, '')}`}
+                  className="group block p-4 md:p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-all duration-200"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 shrink-0">
+                        <AlertTriangle className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="font-mono font-semibold text-foreground">+46{phone}</span>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getRiskLevelColor(riskLevel)}`}>
+                            {report.category}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-1">{report.message}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-1">{scam.description}</p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-6 text-sm text-gray-600">
-                  <div className="flex items-center gap-1.5">
-                    <Phone className="h-4 w-4" />
-                    <span>{scam.reports} rapporter</span>
+                    <div className="flex items-center gap-6 text-sm text-gray-600">
+                      <div className="flex items-center gap-1.5">
+                        <Phone className="h-4 w-4" />
+                        <span>{totalReports} rapporter</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-4 w-4" />
+                        <span>{formatDate(report.created_at)}</span>
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4" />
-                    <span>{scam.lastReported}</span>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading && reports.length === 0 && !error && (
+          <div className="text-center py-12 text-gray-600">
+            Inga rapporter än. Rapportera ett bluffnummer för att starta!
+          </div>
+        )}
       </div>
     </section>
   );
@@ -213,14 +238,27 @@ const LatestScams = () => {
 
 // Popular Scam Numbers Component
 const PopularScamNumbers = () => {
-  const popularNumbers = [
-    { number: '+46769452000', searches: 12450, trend: '+23%' },
-    { number: '+46701234567', searches: 8932, trend: '+15%' },
-    { number: '+46761111222', searches: 6543, trend: '+8%' },
-    { number: '+46731234567', searches: 5421, trend: '+12%' },
-    { number: '+46708765432', searches: 4321, trend: '+5%' },
-    { number: '+46723456789', searches: 3210, trend: '+3%' },
-  ];
+  const [trending, setTrending] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const res = await fetch('/api/trending?limit=10');
+        if (!res.ok) throw new Error('Failed to fetch trending numbers');
+        const data = await res.json();
+        setTrending(data);
+      } catch (err) {
+        console.error('Error fetching trending:', err);
+        setError('Could not load trending numbers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrending();
+  }, []);
 
   return (
     <section className="py-16 md:py-24 bg-gray-50">
@@ -230,32 +268,63 @@ const PopularScamNumbers = () => {
           <p className="text-gray-600 mt-2">Nummer som svenskar söker på mest just nu</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {popularNumbers.map((item, index) => (
-            <a
-              key={item.number}
-              href={`/nummer/${item.number.replace(/\D/g, '')}`}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all duration-200 animate-in fade-in"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-sm font-bold">
-                {index + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-mono font-semibold text-foreground group-hover:text-blue-600 transition-colors">
-                  {item.number}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="h-3 w-3" />
-                  <span>{item.searches.toLocaleString('sv-SE')} sökningar</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 text-sm font-medium text-green-600">
-                <TrendingUp className="h-4 w-4" />
-                {item.trend}
-              </div>
-            </a>
-          ))}
-        </div>
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center gap-2 text-gray-600">
+              <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              Laddar trendande nummer...
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+            {error}
+          </div>
+        )}
+
+        {!loading && trending.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {trending.map((item: any, index: number) => {
+              const phone = item.numbers?.phone || 'Okänt nummer';
+              const searchesToday = item.searches_today || 0;
+              const delta = item.delta || 0;
+
+              return (
+                <a
+                  key={`${item.id}-${index}`}
+                  href={`/nummer/${phone.replace(/\D/g, '')}`}
+                  className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-sm font-bold shrink-0">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-mono font-semibold text-foreground group-hover:text-blue-600 transition-colors">
+                      +46{phone}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Phone className="h-3 w-3" />
+                      <span>{searchesToday.toLocaleString('sv-SE')} sökningar</span>
+                    </div>
+                  </div>
+                  {delta > 0 && (
+                    <div className="flex items-center gap-1 text-sm font-medium text-green-600 shrink-0">
+                      <TrendingUp className="h-4 w-4" />
+                      +{delta}%
+                    </div>
+                  )}
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading && trending.length === 0 && !error && (
+          <div className="text-center py-12 text-gray-600">
+            Inga trendande nummer än.
+          </div>
+        )}
       </div>
     </section>
   );

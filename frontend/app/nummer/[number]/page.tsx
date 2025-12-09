@@ -1,89 +1,295 @@
 'use client';
 
-import { Shield, AlertCircle, ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AlertTriangle, Phone, Clock, ThumbsUp, SendHorizontal, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-export default function Number({ params }: { params: { number: string } }) {
-  const [reports, setReports] = useState([
-    { id: 1, author: 'Användare123', text: 'Fick ett SMS om ett paket från PostNord. Var en bluff!', upvotes: 145, downvotes: 2, date: '2 timmar sedan' },
-    { id: 2, author: 'Anonym', text: 'Ringde och sa att jag hade pengar att få tillbaka från skatten', upvotes: 87, downvotes: 1, date: '5 timmar sedan' },
-  ]);
+export default function NumberPage({ params }: { params: { number: string } }) {
+  const phone = params.number;
+  const [numberData, setNumberData] = useState<any>(null);
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ category: '', message: '' });
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  useEffect(() => {
+    const fetchNumberData = async () => {
+      try {
+        const res = await fetch(`/api/search?phone=${phone}`);
+        if (!res.ok) throw new Error('Failed to fetch number details');
+        const data = await res.json();
+        setNumberData(data);
+        setReports(data.reports || []);
+      } catch (err) {
+        console.error('Error fetching number:', err);
+        setError('Could not load number details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (phone) fetchNumberData();
+  }, [phone]);
+
+  const handleSubmitReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    try {
+      const res = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone,
+          category: formData.category,
+          message: formData.message,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to submit report');
+
+      setFormData({ category: '', message: '' });
+      setSubmitSuccess(true);
+
+      // Refresh reports
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (err) {
+      console.error('Error submitting report:', err);
+      setSubmitError('Could not submit report. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getRiskLevelColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case 'HIGH':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'LOW':
+        return 'bg-green-100 text-green-800 border-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
+  const getRiskLevelLabel = (riskLevel: string) => {
+    switch (riskLevel) {
+      case 'HIGH':
+        return '🔴 Högrisk';
+      case 'MEDIUM':
+        return '🟡 Medel risk';
+      case 'LOW':
+        return '🟢 Låg risk';
+      default:
+        return 'Okänd';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'just nu';
+    if (diffMins < 60) return `${diffMins} min sedan`;
+    if (diffHours < 24) return `${diffHours}h sedan`;
+    if (diffDays === 1) return '1d sedan';
+    return `${diffDays}d sedan`;
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <Header />
-      <main className="flex-1 py-12">
-        <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">{params.number}</h1>
-            <p className="text-gray-600">Telefonnummer information och rapporter</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <div className="md:col-span-2">
-              <div className="p-6 border-2 border-red-200 rounded-lg bg-red-50 mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <AlertCircle className="h-8 w-8 text-red-600" />
-                  <h2 className="text-2xl font-bold text-red-600">Högrisk nummer</h2>
-                </div>
-                <p className="text-gray-700">Detta nummer har flera rapporter av bluff och bedrägeri. Var försiktig om du får samtal eller SMS från detta nummer.</p>
-              </div>
-
-              <h2 className="text-2xl font-bold mb-4">Rapporter ({reports.length})</h2>
-              <div className="space-y-4">
-                {reports.map((report) => (
-                  <div key={report.id} className="p-4 border rounded-lg">
-                    <div className="flex items-start justify-between mb-2">
-                      <span className="font-semibold">{report.author}</span>
-                      <span className="text-sm text-gray-600 flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {report.date}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 mb-3">{report.text}</p>
-                    <div className="flex gap-4">
-                      <button className="flex items-center gap-1 text-green-600 hover:text-green-700">
-                        <ThumbsUp className="h-4 w-4" />
-                        {report.upvotes}
-                      </button>
-                      <button className="flex items-center gap-1 text-red-600 hover:text-red-700">
-                        <ThumbsDown className="h-4 w-4" />
-                        {report.downvotes}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="p-6 border rounded-lg bg-gray-50">
-                <h3 className="font-bold text-lg mb-4">Statistik</h3>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-gray-600 text-sm">Totala rapporter</p>
-                    <p className="text-3xl font-bold text-blue-600">2,345</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 text-sm">Risk nivå</p>
-                    <p className="text-lg font-bold text-red-600">HÖGT RISK</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 text-sm">Senaste rapport</p>
-                    <p className="text-sm">2 timmar sedan</p>
-                  </div>
-                  <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition mt-4">
-                    Rapportera detta nummer
-                  </button>
-                </div>
-              </div>
-            </div>
+      <main className="flex-1">
+        {/* Back Button */}
+        <div className="border-b bg-gray-50">
+          <div className="container mx-auto px-4 py-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Tillbaka
+            </Link>
           </div>
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="py-20 text-center">
+            <div className="inline-flex items-center gap-2 text-gray-600">
+              <div className="h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              Laddar...
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="container mx-auto px-4 py-12">
+            <div className="rounded-lg bg-red-50 border border-red-200 p-6 text-red-700">
+              {error}
+            </div>
+          </div>
+        )}
+
+        {/* Number Details */}
+        {numberData && !loading && (
+          <div className="container mx-auto px-4 py-8">
+            {/* Header Card */}
+            <div className={`rounded-xl border p-6 mb-8 ${getRiskLevelColor(numberData.risk_level)}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm font-medium opacity-75">Telefonnummer</div>
+                  <h1 className="text-3xl md:text-4xl font-bold font-mono mt-2">+46{phone}</h1>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium opacity-75">Risknivå</div>
+                  <div className="text-2xl font-bold mt-2">{getRiskLevelLabel(numberData.risk_level)}</div>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-current border-opacity-20">
+                <div>
+                  <div className="text-sm opacity-75">Totala rapporter</div>
+                  <div className="text-2xl font-bold mt-1">{numberData.total_reports}</div>
+                </div>
+                <div>
+                  <div className="text-sm opacity-75">Sökningar</div>
+                  <div className="text-2xl font-bold mt-1">{numberData.search_count}</div>
+                </div>
+                <div>
+                  <div className="text-sm opacity-75">Senast rapporterad</div>
+                  <div className="text-sm font-bold mt-1">
+                    {numberData.last_reported_at ? formatDate(numberData.last_reported_at) : 'Aldrig'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reports Section */}
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">
+                Rapporter ({reports.length})
+              </h2>
+
+              {reports.length > 0 ? (
+                <div className="grid gap-4">
+                  {reports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="rounded-lg border border-gray-200 bg-white p-6 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+                            <AlertTriangle className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-foreground">{report.category}</div>
+                            <div className="text-sm text-gray-500 flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {formatDate(report.created_at)}
+                            </div>
+                          </div>
+                        </div>
+                        <button className="flex items-center gap-2 px-3 py-1 rounded-full hover:bg-blue-50 text-blue-600 transition-colors">
+                          <ThumbsUp className="h-4 w-4" />
+                          <span className="text-sm font-medium">{report.likes || 0}</span>
+                        </button>
+                      </div>
+                      <p className="text-gray-700 text-sm leading-relaxed">{report.message}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-600">
+                  Inga rapporter ännu för detta nummer.
+                </div>
+              )}
+            </div>
+
+            {/* Report Form */}
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-8 mb-12">
+              <h3 className="text-xl font-bold text-foreground mb-6">Rapportera detta nummer</h3>
+
+              {submitSuccess && (
+                <div className="mb-6 rounded-lg bg-green-50 border border-green-200 p-4 text-green-700">
+                  ✓ Rapporten skickades! Tack för att du hjälper andra.
+                </div>
+              )}
+
+              {submitError && (
+                <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 text-red-700">
+                  {submitError}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitReport} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Typ av bluff *
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Välj en typ...</option>
+                    <option value="PostNord bluff">PostNord bluff</option>
+                    <option value="BankID signering">BankID signering</option>
+                    <option value="Skatteverket bluff">Skatteverket bluff</option>
+                    <option value="Försäkringskassan bluff">Försäkringskassan bluff</option>
+                    <option value="Vishing (telefonbedrägerier)">Vishing (telefonbedrägerier)</option>
+                    <option value="Phishing (nätfiske)">Phishing (nätfiske)</option>
+                    <option value="Annan">Annan</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Beskriv vad som hände *
+                  </label>
+                  <textarea
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    required
+                    placeholder="T.ex. 'Fick ett SMS om att mitt paket inte leverades, med en suspicious länk...'"
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <SendHorizontal className="h-4 w-4" />
+                  {submitting ? 'Skickar...' : 'Skicka rapport'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
       <Footer />
-    </div>
+    </>
   );
 }

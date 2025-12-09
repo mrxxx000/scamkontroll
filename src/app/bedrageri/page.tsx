@@ -13,10 +13,13 @@ import {
   ArrowRight,
   Shield,
   Menu,
-  X
+  X,
+  Phone,
+  Clock
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getLatestReports } from '@/lib/api';
 
 // Header Component
 const Header = () => {
@@ -266,6 +269,92 @@ const getSeverityBadge = (severity: string) => {
   );
 };
 
+// Latest Reports Section Component
+const LatestReportsSection = () => {
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const data = await getLatestReports(5);
+        setReports(data || []);
+      } catch (error) {
+        console.error('Error loading reports:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Okänt datum';
+    try {
+      // Handle format "2025-01-12 10:23:00"
+      const date = new Date(dateString.replace(' ', 'T'));
+      if (isNaN(date.getTime())) {
+        return 'Okänt datum';
+      }
+      return date.toLocaleDateString('sv-SE');
+    } catch {
+      return 'Okänt datum';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4 py-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground">Senaste rapporterna</h2>
+        <div className="grid gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="p-4 rounded-lg bg-gray-100 animate-pulse h-24" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!reports || reports.length === 0) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-gray-600">Inga rapporter ännu. Vara först att rapportera!</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 py-8">
+      <h2 className="text-2xl md:text-3xl font-bold text-foreground">Senaste rapporterna</h2>
+      <div className="grid gap-4">
+        {reports.map((report) => (
+          <Link
+            key={report.id}
+            href={`/nummer/${report.phone_number.replace(/\D/g, '')}`}
+            className="flex flex-col md:flex-row md:items-start gap-3 p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md hover:border-blue-300 transition-all"
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <Phone className="h-4 w-4 text-blue-600 shrink-0" />
+                <span className="font-mono font-semibold text-foreground">{report.phone_number}</span>
+              </div>
+              <p className="text-sm text-blue-600 font-medium mb-1">{report.fraud_type}</p>
+              <p className="text-sm text-gray-600 line-clamp-2">{report.description}</p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
+              <Clock className="h-4 w-4" />
+              <span>
+                {formatDate(report.reported_at)}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const ScamTypesListPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -290,7 +379,7 @@ const ScamTypesListPage = () => {
           </div>
 
           {/* Grid */}
-          <div className="grid gap-6">
+          <div className="grid gap-6 mb-12">
             {scamTypes.map((scam, index) => {
               const IconComponent = scam.icon;
               return (
@@ -320,6 +409,11 @@ const ScamTypesListPage = () => {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Latest Reports Section */}
+          <div className="border-t border-gray-200 pt-12">
+            <LatestReportsSection />
           </div>
         </div>
       </main>
