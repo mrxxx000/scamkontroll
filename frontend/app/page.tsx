@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Search, Shield, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { fetchLatestReports } from '@/lib/api';
+import { fetchLatestReports, getMostSearched } from '@/lib/api';
 
 // Hero Section Component
 const HeroSection = () => {
@@ -326,6 +326,93 @@ const PopularScamNumbers = () => {
   );
 };
 
+// Most Searched Numbers Component  
+const MostSearchedNumbers = () => {
+  const [mostSearched, setMostSearched] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMostSearched = async () => {
+      try {
+        console.log('📱 MostSearched: Fetching data...');
+        const data = await getMostSearched(10);
+        console.log('📱 MostSearched: Got', data?.length, 'numbers');
+        setMostSearched(data || []);
+      } catch (err) {
+        console.error('Error fetching most searched:', err);
+        setError('Kunde inte ladda mest sökta nummer');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMostSearched();
+  }, []);
+
+  return (
+    <section className="py-16 md:py-24">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground">Mest sökta bluffnummer</h2>
+          <p className="text-gray-600 mt-2">Nummer som användare söker på mest</p>
+        </div>
+
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center gap-2 text-gray-600">
+              <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              Laddar mest sökta nummer...
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+            {error}
+          </div>
+        )}
+
+        {!loading && mostSearched.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mostSearched.map((item: any, index: number) => {
+              const phone = item.phone_number || 'Okänt nummer';
+              const searches = item.search_count || 0;
+
+              return (
+                <a
+                  key={`${item.id}-${index}`}
+                  href={`/nummer/${phone.replace(/\D/g, '')}`}
+                  className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-sm font-bold shrink-0">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-mono font-semibold text-foreground group-hover:text-blue-600 transition-colors">
+                      {phone}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Search className="h-3 w-3" />
+                      <span>{searches.toLocaleString('sv-SE')} sökningar</span>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading && mostSearched.length === 0 && !error && (
+          <div className="text-center py-12 text-gray-600">
+            Inga sökta nummer än.
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 // Scam Types Section Component
 const ScamTypesSection = () => {
   const scamTypes = [
@@ -482,7 +569,7 @@ export default function Home() {
       <Header />
       <HeroSection />
       <LatestScams />
-      <PopularScamNumbers />
+      <MostSearchedNumbers />
       <ScamTypesSection />
       <WarningsSection />
       <Footer />

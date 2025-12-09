@@ -122,3 +122,54 @@ export async function getFraudTypeStats() {
     .map(([type, count]) => ({ type, count }))
     .sort((a, b) => b.count - a.count);
 }
+
+// Track search - increment search_count for a phone number
+export async function trackSearch(phoneNumber: string) {
+  // Don't track invalid phone numbers
+  if (!phoneNumber || phoneNumber.length < 5) {
+    console.log('⚠️  Skipping search tracking for invalid number:', phoneNumber);
+    return null;
+  }
+
+  try {
+    // Try to find existing report
+    const { data: existing, error: selectError } = await supabase
+      .from('fraud_reports')
+      .select('*')
+      .eq('phone_number', phoneNumber)
+      .single();
+
+    if (existing) {
+      // Update search_count
+      const { data: updated, error: updateError } = await supabase
+        .from('fraud_reports')
+        .update({ search_count: (existing.search_count || 0) + 1 })
+        .eq('phone_number', phoneNumber)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+      console.log(`✅ Tracked search for ${phoneNumber}, new count: ${(existing.search_count || 0) + 1}`);
+      return updated;
+    } else {
+      // Only log, don't create entry
+      console.log(`ℹ️  Number ${phoneNumber} not found in database, not creating entry`);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error tracking search:', error);
+    return null;
+  }
+}
+
+// Get most searched phone numbers
+export async function getMostSearched(limit = 10) {
+  const { data, error } = await supabase
+    .from('fraud_reports')
+    .select('*')
+    .order('search_count', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data || [];
+}

@@ -14,6 +14,8 @@ import {
   submitFraudReport,
   searchFraudReports,
   getAllPhoneNumbers,
+  trackSearch,
+  getMostSearched,
 } from './api/fraudReports';
 
 const app = express();
@@ -28,24 +30,7 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Backend is running' });
 });
 
-// Numbers Routes
-app.get('/api/numbers/:phone', async (req: Request, res: Response) => {
-  try {
-    const { phone } = req.params;
-
-    const reports = await getReportsByPhoneNumber(phone);
-
-    res.json({
-      phone_number: phone,
-      total_reports: reports.length,
-      reports,
-    });
-  } catch (error) {
-    console.error('Error fetching number details:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
+// Numbers Routes - Define specific routes BEFORE generic :phone route
 // Get latest reported scams (for homepage)
 app.get('/api/numbers/reports/latest', async (req: Request, res: Response) => {
   try {
@@ -70,6 +55,18 @@ app.get('/api/numbers/trending', async (req: Request, res: Response) => {
   }
 });
 
+// Get most searched numbers
+app.get('/api/numbers/most-searched', async (req: Request, res: Response) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const mostSearched = await getMostSearched(limit);
+    res.json(mostSearched);
+  } catch (error) {
+    console.error('Error fetching most searched numbers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Search phone numbers
 app.get('/api/numbers/search', async (req: Request, res: Response) => {
   try {
@@ -83,6 +80,29 @@ app.get('/api/numbers/search', async (req: Request, res: Response) => {
     res.json(results);
   } catch (error) {
     console.error('Error searching numbers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Generic phone number route - MUST be last
+app.get('/api/numbers/:phone', async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.params;
+    console.log(`📞 Fetching details for phone: ${phone}`);
+
+    // Track the search
+    await trackSearch(phone);
+
+    const reports = await getReportsByPhoneNumber(phone);
+    console.log(`📊 Found ${reports.length} reports for ${phone}`);
+
+    res.json({
+      phone_number: phone,
+      total_reports: reports.length,
+      reports,
+    });
+  } catch (error) {
+    console.error('Error fetching number details:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

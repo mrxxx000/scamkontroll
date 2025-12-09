@@ -69,6 +69,20 @@ export async function submitReport(phoneNumber: string, fraudType: string, descr
   }
 }
 
+export async function getMostSearched(limit = 10) {
+  try {
+    console.log('🔍 Fetching most searched numbers from', `${API_BASE}/api/numbers/most-searched?limit=${limit}`);
+    const response = await fetch(`${API_BASE}/api/numbers/most-searched?limit=${limit}`);
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    const data = await response.json();
+    console.log('✅ Received', data?.length || 0, 'most searched numbers');
+    return data || [];
+  } catch (error) {
+    console.error('❌ Error fetching most searched numbers:', error);
+    return [];
+  }
+}
+
 export async function submitContact(name: string, email: string, subject: string, message: string) {
   const response = await fetch('/api/contacts', {
     method: 'POST',
