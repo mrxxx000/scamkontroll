@@ -18,6 +18,7 @@ import {
   getMostSearched,
 } from './api/fraudReports';
 import { getFraudTypeCounts } from './api/fraudTypeCounts';
+import { getReportsByType } from './api/fraudReports';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -93,6 +94,20 @@ app.get('/api/fraud-type-counts', async (req: Request, res: Response) => {
     res.json(counts);
   } catch (error) {
     console.error('Error in /api/fraud-type-counts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get reports for a specific fraud type/category
+app.get('/api/fraud-type-reports', async (req: Request, res: Response) => {
+  try {
+    const type = req.query.type as string | undefined;
+    if (!type) return res.status(400).json({ error: 'Missing type query parameter' });
+
+    const reports = await getReportsByType(type);
+    res.json({ reports });
+  } catch (error) {
+    console.error('Error in /api/fraud-type-reports:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

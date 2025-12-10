@@ -21,8 +21,17 @@ export async function fetchFraudTypes() {
 }
 
 export async function fetchFraudType(_slug: string) {
-  // Detailed single-type endpoint removed — return null so callers fallback.
-  return null;
+  // Try the backend per-type reports endpoint. Returns { reports: [...] } on success.
+  try {
+    const response = await fetch(`${API_BASE}/api/fraud-type-reports?type=${encodeURIComponent(_slug)}`);
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    const data = await response.json();
+    // Expect { reports: [...] }
+    return data;
+  } catch (error) {
+    console.warn('fetchFraudType failed:', error);
+    return null;
+  }
 }
 
 export async function fetchPhoneNumber(number: string) {

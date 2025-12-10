@@ -188,6 +188,45 @@ export async function getFraudTypeStats() {
     .sort((a, b) => b.count - a.count);
 }
 
+// Get all reports for a specific fraud type/category
+export async function getReportsByType(type: string) {
+  if (!type) return [];
+
+  // Try exact match first
+  try {
+    let { data, error } = await supabase
+      .from('fraud_reports')
+      .select('*')
+      .eq('fraud_type', type)
+      .order('reported_at', { ascending: false });
+
+    if (!error && data && data.length > 0) return data;
+
+    // Try case-insensitive / partial match
+    ({ data, error } = await supabase
+      .from('fraud_reports')
+      .select('*')
+      .ilike('fraud_type', `%${type}%`)
+      .order('reported_at', { ascending: false }));
+
+    if (!error && data && data.length > 0) return data;
+
+    // Fallback: normalize (remove dashes/spaces) and try partial match on normalized string
+    const norm = String(type).toLowerCase().replace(/[-_\s]+/g, '');
+    ({ data, error } = await supabase
+      .from('fraud_reports')
+      .select('*')
+      .ilike('fraud_type', `%${norm}%`)
+      .order('reported_at', { ascending: false }));
+
+    if (!error && data) return data || [];
+  } catch (err) {
+    console.error('Error fetching reports by type:', err);
+  }
+
+  return [];
+}
+
 // Track search - increment search_count for a phone number
 export async function trackSearch(phoneNumber: string) {
   // Don't track invalid phone numbers
