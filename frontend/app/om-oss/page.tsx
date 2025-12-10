@@ -1,6 +1,6 @@
 'use client';
 
-import { Shield, TrendingUp, Users, CheckCircle } from 'lucide-react';
+import { CheckCircle, Shield, Users, TrendingUp } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -9,86 +9,88 @@ export default function OmOss() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Om Scamkontroll</h1>
-
-          <div className="prose prose-lg max-w-3xl mb-8">
-            <p className="text-lg text-gray-600">
-              Scamkontroll är en tjänst som samlar in rapporter om misstänkta bluffar, bedrägerier och falska meddelanden. Målet är att hjälpa användare att snabbt förstå om ett nummer, SMS eller meddelande kan vara farligt.
+        <div>
+          <section className="max-w-3xl mx-auto px-6 py-10">
+            <h2 className="text-3xl font-bold mb-4">Om Scamkontroll</h2>
+            <p className="text-gray-700 mb-6">
+              Scamkontroll är en tjänst som samlar in rapporter om misstänkta bluffar, bedrägerier och falska meddelanden.
+              Målet är att hjälpa användare att snabbt förstå om ett nummer, SMS eller meddelande kan vara farligt.
             </p>
 
-            <h2>Vad vi visar</h2>
-            <ul>
+            {/* Quick links: responsive icon cards placed right after main prose */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <a href="/rapportera" className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
+                <CheckCircle className="h-6 w-6 text-blue-600 shrink-0" />
+                <div>
+                  <div className="text-sm font-semibold">Rapporter</div>
+                  <div className="text-xs text-gray-500">Skicka in ett misstänkt nummer eller meddelande</div>
+                </div>
+              </a>
+
+              <a href="/bedrageri" className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
+                <Shield className="h-6 w-6 text-green-600 shrink-0" />
+                <div>
+                  <div className="text-sm font-semibold">Vanliga bedrägerier</div>
+                  <div className="text-xs text-gray-500">Utforska kategorier och exempel</div>
+                </div>
+              </a>
+
+              <a href="/" className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
+                <Users className="h-6 w-6 text-purple-600 shrink-0" />
+                <div>
+                  <div className="text-sm font-semibold">Sök nummer</div>
+                  <div className="text-xs text-gray-500">Hitta rapporter för ett telefonnummer</div>
+                </div>
+              </a>
+
+              <a href="/artiklar" className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
+                <TrendingUp className="h-6 w-6 text-yellow-600 shrink-0" />
+                <div>
+                  <div className="text-sm font-semibold">Artiklar och Guide</div>
+                  <div className="text-xs text-gray-500">Praktiska exempel för att känna igen bluff</div>
+                </div>
+              </a>
+            </div>
+
+            <h3 className="text-xl font-semibold mt-8">Vad vi visar</h3>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1 mt-2">
               <li>Rapporter från användare</li>
               <li>Vanliga typer av bedrägerier</li>
               <li>Exempel och varningar</li>
               <li>Sammanställd information för att underlätta egna bedömningar</li>
             </ul>
 
-            <h2>Vår mission</h2>
-            <ul>
+            <h3 className="text-xl font-semibold mt-8">Vår mission</h3>
+            <ul className="list-disc pl-6 text-gray-700 space-y-1 mt-2">
               <li>Hjälpa människor att känna igen och undvika bedrägerier</li>
               <li>Göra det enkelt att kontrollera misstänkta meddelanden</li>
               <li>Sprida kunskap om hur moderna bluffar fungerar</li>
             </ul>
 
-            <h2>Hur vi arbetar</h2>
+            <h3 className="text-xl font-semibold mt-8">Hur vi arbetar</h3>
 
-            <h3>Rapportering</h3>
-            <p>Användare skickar in rapporter om misstänkta samtal, länkar, SMS och andra bedrägeriförsök.</p>
-
-            <h3>Granskning</h3>
-            <p>Rapporter kontrolleras och uppenbart felaktiga eller dubbla anmälningar tas bort.</p>
-
-            <h3>Databas</h3>
-            <p>Godkända rapporter sparas så att andra användare kan se informationen.</p>
-
-            <h3>Sökning</h3>
-            <p>Besökare kan söka på nummer eller kategorier för att hitta relevanta rapporter.</p>
-          </div>
-
-          {/* Quick links: small styled boxes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            <a href="/rapportera" className="block p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
-                <div>
-                  <div className="text-sm font-semibold">Rapportera</div>
-                  <div className="text-xs text-gray-500">Skicka in ett misstänkt nummer eller meddelande</div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div className="bg-gray-100 p-4 rounded-xl">
+                <h4 className="font-semibold mb-1">1. Rapportering</h4>
+                <p className="text-gray-600">Användare skickar in rapporter om misstänkta samtal, länkar och SMS.</p>
               </div>
-            </a>
 
-            <a href="/bedrageri" className="block p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
-              <div className="flex items-center gap-3">
-                <Shield className="h-6 w-6 text-green-600" />
-                <div>
-                  <div className="text-sm font-semibold">Vanliga bedrägerier</div>
-                  <div className="text-xs text-gray-500">Utforska kategorier och exempel</div>
-                </div>
+              <div className="bg-gray-100 p-4 rounded-xl">
+                <h4 className="font-semibold mb-1">2. Granskning</h4>
+                <p className="text-gray-600">Rapporter kontrolleras och felaktiga anmälningar tas bort.</p>
               </div>
-            </a>
 
-            <a href="/" className="block p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
-              <div className="flex items-center gap-3">
-                <Users className="h-6 w-6 text-purple-600" />
-                <div>
-                  <div className="text-sm font-semibold">Sök nummer</div>
-                  <div className="text-xs text-gray-500">Hitta rapporter för ett telefonnummer</div>
-                </div>
+              <div className="bg-gray-100 p-4 rounded-xl">
+                <h4 className="font-semibold mb-1">3. Databas</h4>
+                <p className="text-gray-600">Godkända rapporter sparas i databasen.</p>
               </div>
-            </a>
 
-            <a href="/bedrageri" className="block p-4 rounded-lg border border-gray-200 bg-white hover:shadow-md transition-colors">
-              <div className="flex items-center gap-3">
-                <TrendingUp className="h-6 w-6 text-yellow-600" />
-                <div>
-                  <div className="text-sm font-semibold">Exempel & Varningar</div>
-                  <div className="text-xs text-gray-500">Praktiska exempel för att känna igen bluff</div>
-                </div>
+              <div className="bg-gray-100 p-4 rounded-xl">
+                <h4 className="font-semibold mb-1">4. Sökning</h4>
+                <p className="text-gray-600">Besökare kan söka för att hitta relevanta rapporter.</p>
               </div>
-            </a>
-          </div>
+            </div>
+          </section>
         </div>
       </main>
       <Footer />
