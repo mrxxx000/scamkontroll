@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Search, Shield, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { fetchLatestReports, getMostSearched } from '@/lib/api';
+import { fetchLatestReports, getMostSearched, fetchFraudTypes, fetchFraudType } from '@/lib/api';
 
 // Hero Section Component
 const HeroSection = () => {
@@ -500,52 +500,94 @@ const MostSearchedNumbers = () => {
   );
 };
 
-// Scam Types Section Component
+// Scam Types Section Component - fetch real data and show reports on click
 const ScamTypesSection = () => {
-  const scamTypes = [
-    {
-      icon: Package,
-      title: 'PostNord bluff',
-      description: 'Falska SMS om paket som kräver avgift eller tullkostnad',
-      href: '/bedrageri/postnord-bluff',
-      reports: 15234,
-    },
-    {
-      icon: CreditCard,
-      title: 'BankID signering',
-      description: 'Bedragare som lurar dig att signera med BankID',
-      href: '/bedrageri/bankid-bluff',
-      reports: 12456,
-    },
-    {
-      icon: Building2,
-      title: 'Skatteverket bluff',
-      description: 'Falska meddelanden om skatteåterbäring',
-      href: '/bedrageri/skatteverket-bluff',
-      reports: 8765,
-    },
-    {
-      icon: Smartphone,
-      title: 'Vishing (telefonbedrägerier)',
-      description: 'Samtal från falska banktjänstemän eller myndigheter',
-      href: '/bedrageri/vishing',
-      reports: 7543,
-    },
-    {
-      icon: Mail,
-      title: 'Phishing (nätfiske)',
-      description: 'Falska e-post och SMS med skadliga länkar',
-      href: '/bedrageri/phishing',
-      reports: 6234,
-    },
-    {
-      icon: ShieldAlert,
-      title: 'Försäkringsbedrägerier',
-      description: 'Falska meddelanden från försäkringsbolag',
-      href: '/bedrageri/forsakring-bluff',
-      reports: 4321,
-    },
-  ];
+  const [scamTypes, setScamTypes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [selectedType, setSelectedType] = useState<any | null>(null);
+  const [typeReports, setTypeReports] = useState<any[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        setLoading(true);
+        // Try frontend helper first
+        let data: any[] = [];
+        try {
+          data = await fetchFraudTypes();
+        } catch (err) {
+          console.warn('fetchFraudTypes failed, falling back to static list', err);
+        }
+
+        // If API returned nothing, fall back to static list (keeps previous behavior)
+        if (!data || data.length === 0) {
+          data = [
+            { icon: Package, title: 'PostNord bluff', description: 'Falska SMS om paket som kräver avgift eller tullkostnad', href: '/bedrageri/postnord-bluff', reports: 15234, slug: 'postnord-bluff' },
+            { icon: CreditCard, title: 'BankID signering', description: 'Bedragare som lurar dig att signera med BankID', href: '/bedrageri/bankid-bluff', reports: 12456, slug: 'bankid-bluff' },
+            { icon: Building2, title: 'Skatteverket bluff', description: 'Falska meddelanden om skatteåterbäring', href: '/bedrageri/skatteverket-bluff', reports: 8765, slug: 'skatteverket-bluff' },
+            { icon: Smartphone, title: 'Vishing (telefonbedrägerier)', description: 'Samtal från falska banktjänstemän eller myndigheter', href: '/bedrageri/vishing', reports: 7543, slug: 'vishing' },
+            { icon: Mail, title: 'Phishing (nätfiske)', description: 'Falska e-post och SMS med skadliga länkar', href: '/bedrageri/phishing', reports: 6234, slug: 'phishing' },
+            { icon: ShieldAlert, title: 'Försäkringsbedrägerier', description: 'Falska meddelanden från försäkringsbolag', href: '/bedrageri/forsakring-bluff', reports: 4321, slug: 'forsakring-bluff' },
+          ];
+        }
+
+        setScamTypes(data);
+      } catch (err) {
+        console.error('Error loading fraud types:', err);
+        setError('Kunde inte ladda bedrägeriarter');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTypes();
+  }, []);
+
+  const openType = async (scam: any) => {
+    setSelectedType(scam);
+    setReportsLoading(true);
+    setTypeReports([]);
+
+    // Determine slug to fetch details (prefer slug property)
+    const slug = scam.slug || (scam.href ? scam.href.replace('/bedrageri/', '') : undefined);
+
+    try {
+      let data: any = null;
+      if (slug) {
+        try {
+          data = await fetchFraudType(slug);
+        } catch (e) {
+          console.warn('fetchFraudType failed', e);
+        }
+      }
+
+      // If the API returned an object with reports, use it. Otherwise try generic endpoint
+      if (data && data.reports) {
+        setTypeReports(data.reports);
+      } else if (slug) {
+        // fallback: call frontend proxy route that may return detailed data
+        try {
+          const res = await fetch(`/api/fraud-types?slug=${encodeURIComponent(slug)}`);
+          if (res.ok) {
+            const json = await res.json();
+            setTypeReports(json.reports || json.items || []);
+          } else {
+            setTypeReports([]);
+          }
+        } catch (e) {
+          console.error('Error fetching reports for slug', slug, e);
+          setTypeReports([]);
+        }
+      } else {
+        setTypeReports([]);
+      }
+    } finally {
+      setReportsLoading(false);
+    }
+  };
 
   return (
     <section className="py-16 md:py-24">
@@ -561,30 +603,77 @@ const ScamTypesSection = () => {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {scamTypes.map((scam) => {
-            const IconComponent = scam.icon;
-            return (
-              <a
-                key={scam.href}
-                href={scam.href}
-                className="group p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg hover:border-blue-300 transition-all duration-200 animate-in fade-in"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <IconComponent className="h-6 w-6" />
+        {loading && <div className="text-center py-8">Laddar bedrägeriarter...</div>}
+        {error && <div className="text-center py-8 text-red-600">{error}</div>}
+
+        {!loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {scamTypes.map((scam: any) => {
+              const IconComponent = scam.icon || Package;
+              const reportsCount = scam.reports || scam.count || scam.reports_count || 0;
+              const slug = scam.slug || (scam.href ? scam.href.replace('/bedrageri/', '') : '');
+
+              return (
+                <div
+                  key={slug || scam.title}
+                  onClick={() => openType(scam)}
+                  className="group p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg hover:border-blue-300 transition-all duration-200 animate-in fade-in cursor-pointer"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <IconComponent className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-blue-600 transition-colors">
+                    {scam.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">{scam.description}</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">{reportsCount.toLocaleString('sv-SE')} rapporter</span>
+                    <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-blue-600 transition-colors">
-                  {scam.title}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">{scam.description}</p>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">{scam.reports.toLocaleString('sv-SE')} rapporter</span>
-                  <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+              );
+            })}
+          </div>
+        )}
+
+        {/* Modal / drawer for selected type reports */}
+        {selectedType && (
+          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={() => { setSelectedType(null); setTypeReports([]); }} />
+            <div className="relative bg-white rounded-t-lg md:rounded-lg w-full md:w-3/4 lg:w-2/3 max-h-[80vh] overflow-auto p-6 m-4">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold">{selectedType.title}</h3>
+                  <p className="text-sm text-gray-600">{selectedType.description}</p>
                 </div>
-              </a>
-            );
-          })}
-        </div>
+                <button className="text-sm text-gray-500" onClick={() => { setSelectedType(null); setTypeReports([]); }}>Stäng</button>
+              </div>
+
+              <div>
+                {reportsLoading && <div>Laddar rapporter...</div>}
+                {!reportsLoading && typeReports.length === 0 && (
+                  <div className="text-gray-600">Inga rapporter hittades för denna kategori.</div>
+                )}
+
+                {!reportsLoading && typeReports.length > 0 && (
+                  <div className="grid gap-4">
+                    {typeReports.map((r: any) => (
+                      <a key={r.id} href={`/nummer/${(r.phone_number || '').replace(/\D/g, '')}`} className="block p-4 rounded-lg border border-gray-200 hover:shadow-md">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-mono font-semibold">{r.phone_number}</div>
+                            <div className="text-sm text-gray-600">{r.category || r.fraud_type} — {r.message ? (r.message.length > 140 ? r.message.slice(0, 140) + '…' : r.message) : ''}</div>
+                          </div>
+                          <div className="text-sm text-gray-500">{new Date(r.reported_at || r.created_at || '').toLocaleDateString('sv-SE')}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
