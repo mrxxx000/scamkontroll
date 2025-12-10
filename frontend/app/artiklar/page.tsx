@@ -19,8 +19,7 @@ const articles = [
       "7. Prata med nära och kära, särskilt äldre, om att bluffnummer finns. Många drabbas för att de inte vet vad de ska göra när någon ringer. Dela gärna informationen vidare.",
       "8. Om du tvekar — avsluta och ring banken/myndigheten själv för att kontrollera noggrant. Ta tid på dig att tänka. Seriösa företag accepterar det.",
       "9. Använd spärrar, blockeringar eller appar för att filtrera spam och bluff‑samtal. Många operatörer erbjuder nummerspärrar vilket kan minska risken för att bli uppringd av bluffnummer.",
-      "10. Rapportera misstänkta bluffnummer eller samtal till din bank eller polisen direkt — det hjälper att stoppa bedragarna och varna andra.",
-      "Källa: Telekområdgivarna"
+      "10. Rapportera misstänkta bluffnummer eller samtal till din bank eller polisen direkt — det hjälper att stoppa bedragarna och varna andra."
     ]
   },
   {
@@ -38,10 +37,22 @@ const articles = [
   },
   {
     title: "PostNord bluff: Så skyddar du dig",
-    description: "Allt du behöver veta om de falska PostNord-SMS som cirkulerar i Sverige.",
-    readTime: "6 min",
-    date: "7 dec 2025",
-    category: "Bedrageri"
+    category: "Bedrageri",
+    content: [
+      "Allt du behöver veta om de falska PostNord-SMS som cirkulerar i Sverige och försöker lura dig att betala avgifter eller lämna ut information.",
+      "Vad är PostNord-bluffen?\n\nBedragare skickar falska SMS som påstår att ett paket är försenat eller att du måste betala en avgift/tull. Länkarna leder till falska betalningssidor där bedragare försöker stjäla dina uppgifter eller pengar.",
+      "Så känner du igen bluffen",
+      "• SMS med okänt avsändarnummer som påstår att ditt paket är på väg",
+       "• Krav på “tullavgift” eller betalning via länk\n• Länkar som leder till falska webbplatser som inte är PostNords officiella",
+       "• Stress eller brådskande meddelanden som försöker få dig att agera snabbt",
+      "Så skyddar du dig",
+      "• Klicka aldrig på länkar i SMS från okända avsändare",
+      "• Logga aldrig in med BankID eller lämna kortuppgifter via länkar i SMS",
+      "• Kontrollera alltid paketstatus på PostNords officiella webbplats",
+      "• Radera misstänkta SMS och lägg på om någon ringer",
+      "• Rapportera bluffen till PostNord och polisen om du utsätts",
+      "Tips: Om du vill kontrollera ett nummer som ringt eller skickat SMS, använd vårt sökfält högst upp på sidan."
+    ]
   },
   {
     title: "Vad gör du om du blir bluffad?",
@@ -96,9 +107,20 @@ export default function Artiklar() {
               </div>
               <h2 className="text-2xl font-bold mb-4">{articles[activeIndex].title}</h2>
               <div className="prose max-w-none text-gray-700">
-                {articles[activeIndex].content?.map((p: string, i: number) => (
-                  <p key={i}>{p}</p>
-                ))}
+                {articles[activeIndex].content?.map((p: string, i: number) => {
+                  // Bold the specific PostNord heading when present
+                  const heading = 'Vad är PostNord-bluffen?';
+                  if (p.startsWith(heading)) {
+                    const rest = p.replace(heading + '\n\n', '');
+                    return (
+                      <p key={i}>
+                        <strong>{heading}</strong>
+                        {rest ? <><br />{rest}</> : null}
+                      </p>
+                    );
+                  }
+                  return <p key={i}>{p}</p>;
+                })}
               </div>
             </article>
           )}
