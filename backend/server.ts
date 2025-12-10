@@ -17,6 +17,7 @@ import {
   trackSearch,
   getMostSearched,
 } from './api/fraudReports';
+import { getFraudTypeCounts } from './api/fraudTypeCounts';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -81,6 +82,17 @@ app.get('/api/numbers/trending', async (req: Request, res: Response) => {
     res.json(trending);
   } catch (error) {
     console.error('Error fetching trending numbers:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get fraud type counts (counts per category from fraud_reports)
+app.get('/api/fraud-type-counts', async (req: Request, res: Response) => {
+  try {
+    const counts = await getFraudTypeCounts();
+    res.json(counts);
+  } catch (error) {
+    console.error('Error in /api/fraud-type-counts:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

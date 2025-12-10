@@ -544,6 +544,40 @@ const ScamTypesSection = () => {
           ];
         }
 
+        // Fetch counts from backend proxy and merge into types
+        try {
+          const countsRes = await fetch('/api/fraud-type-counts');
+          if (countsRes.ok) {
+            const countsData: Array<{ type: string; count: number }> = await countsRes.json();
+            // build lookup by original type string
+            const countsByType = new Map<string, number>();
+            (countsData || []).forEach((c: any) => countsByType.set(String(c.type), Number(c.count)));
+
+            // helper to find best match for a scam entry
+            const findCount = (scam: any) => {
+              // exact matches
+              if (countsByType.has(scam.title)) return countsByType.get(scam.title) || 0;
+              if (scam.slug && countsByType.has(scam.slug)) return countsByType.get(scam.slug) || 0;
+
+              // case-insensitive match
+              const lowerTitle = (scam.title || '').toLowerCase();
+              for (const [k, v] of countsByType.entries()) {
+                if (String(k).toLowerCase() === lowerTitle) return v;
+                // match if k equals slug with dashes/spaces normalized
+                const normK = String(k).toLowerCase().replace(/[-_\s]+/g, '');
+                const normTitle = lowerTitle.replace(/[-_\s]+/g, '');
+                if (normK === normTitle) return v;
+              }
+
+              return 0;
+            };
+
+            data = data.map((s: any) => ({ ...s, reports: findCount(s) }));
+          }
+        } catch (err) {
+          console.warn('Could not fetch fraud type counts', err);
+        }
+
         setScamTypes(data);
       } catch (err) {
         console.error('Error loading fraud types:', err);
