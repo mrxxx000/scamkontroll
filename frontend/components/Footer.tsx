@@ -47,11 +47,7 @@ export default function Footer() {
                   Om oss
                 </Link>
               </li>
-              <li>
-                <Link href="/kontakt" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                  Kontakt
-                </Link>
-              </li>
+              {/* Contact link temporarily disabled */}
               <li>
                 <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Integritetspolicy

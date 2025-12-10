@@ -12,7 +12,6 @@ export default function Header() {
     { href: '/bedrageri', label: 'Bedrägeriarter' },
     { href: '/artiklar', label: 'Artiklar' },
     { href: '/om-oss', label: 'Om oss' },
-    { href: '/kontakt', label: 'Kontakt' },
   ];
 
   return (
