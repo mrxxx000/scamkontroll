@@ -48,11 +48,6 @@ export default function Footer() {
                 </Link>
               </li>
               {/* Contact link temporarily disabled */}
-              <li>
-                <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                  Integritetspolicy
-                </Link>
-              </li>
             </ul>
           </div>
 
