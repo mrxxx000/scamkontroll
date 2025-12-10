@@ -258,7 +258,13 @@ export default function NumberPage({ params }: { params: Promise<{ number: strin
                 </div>
               ) : (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-600">
-                  Inga rapporter ännu för detta nummer.
+                  {numberData && numberData.search_count && numberData.search_count > 0 ? (
+                    <>
+                      {numberData.search_count} personer har sökt efter detta nummer, men ingen rapport har lämnats ännu.
+                    </>
+                  ) : (
+                    <>Inga rapporter ännu för detta nummer.</>
+                  )}
                 </div>
               )}
             </div>
