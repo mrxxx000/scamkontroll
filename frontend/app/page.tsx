@@ -5,6 +5,7 @@ import { Search, Shield, AlertTriangle, Package, CreditCard, Building2, Smartpho
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { fetchLatestReports, getMostSearched, fetchFraudTypes, fetchFraudType } from '@/lib/api';
+import { getIconForType } from '@/lib/fraudTypeIcons';
 
 // Hero Section Component
 const HeroSection = () => {
@@ -547,33 +548,38 @@ const ScamTypesSection = () => {
         // Fetch counts from backend proxy and merge into types
         try {
           const countsRes = await fetch('/api/fraud-type-counts');
-          if (countsRes.ok) {
-            const countsData: Array<{ type: string; count: number }> = await countsRes.json();
-            // build lookup by original type string
-            const countsByType = new Map<string, number>();
-            (countsData || []).forEach((c: any) => countsByType.set(String(c.type), Number(c.count)));
+            if (countsRes.ok) {
+              const countsData: Array<{ type: string; count: number }> = await countsRes.json();
+              // build lookup by original type string
+              const countsByType = new Map<string, number>();
+              (countsData || []).forEach((c: any) => countsByType.set(String(c.type), Number(c.count)));
 
-            // helper to find best match for a scam entry
-            const findCount = (scam: any) => {
-              // exact matches
-              if (countsByType.has(scam.title)) return countsByType.get(scam.title) || 0;
-              if (scam.slug && countsByType.has(scam.slug)) return countsByType.get(scam.slug) || 0;
+              // helper to find best match for a scam entry
+              const findCount = (scam: any) => {
+                // exact matches
+                if (countsByType.has(scam.title)) return countsByType.get(scam.title) || 0;
+                if (scam.slug && countsByType.has(scam.slug)) return countsByType.get(scam.slug) || 0;
 
-              // case-insensitive match
-              const lowerTitle = (scam.title || '').toLowerCase();
-              for (const [k, v] of countsByType.entries()) {
-                if (String(k).toLowerCase() === lowerTitle) return v;
-                // match if k equals slug with dashes/spaces normalized
-                const normK = String(k).toLowerCase().replace(/[-_\s]+/g, '');
-                const normTitle = lowerTitle.replace(/[-_\s]+/g, '');
-                if (normK === normTitle) return v;
-              }
+                // case-insensitive match
+                const lowerTitle = (scam.title || '').toLowerCase();
+                for (const [k, v] of countsByType.entries()) {
+                  if (String(k).toLowerCase() === lowerTitle) return v;
+                  // match if k equals slug with dashes/spaces normalized
+                  const normK = String(k).toLowerCase().replace(/[-_\s]+/g, '');
+                  const normTitle = lowerTitle.replace(/[-_\s]+/g, '');
+                  if (normK === normTitle) return v;
+                }
 
-              return 0;
-            };
+                return 0;
+              };
 
-            data = data.map((s: any) => ({ ...s, reports: findCount(s) }));
-          }
+              data = data.map((s: any) => {
+                const reports = findCount(s);
+                // Prefer existing icon if present; otherwise use mapped icon
+                const iconComp = s.icon || getIconForType(s.title || s.slug);
+                return { ...s, reports, icon: iconComp };
+              });
+            }
         } catch (err) {
           console.warn('Could not fetch fraud type counts', err);
         }
@@ -611,21 +617,8 @@ const ScamTypesSection = () => {
       // If the API returned an object with reports, use it. Otherwise try generic endpoint
       if (data && data.reports) {
         setTypeReports(data.reports);
-      } else if (slug) {
-        // fallback: call frontend proxy route that may return detailed data
-        try {
-          const res = await fetch(`/api/fraud-types?slug=${encodeURIComponent(slug)}`);
-          if (res.ok) {
-            const json = await res.json();
-            setTypeReports(json.reports || json.items || []);
-          } else {
-            setTypeReports([]);
-          }
-        } catch (e) {
-          console.error('Error fetching reports for slug', slug, e);
-          setTypeReports([]);
-        }
       } else {
+        // Detailed per-type reports endpoint was removed; no detailed reports available here.
         setTypeReports([]);
       }
     } finally {

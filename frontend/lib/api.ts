@@ -15,15 +15,14 @@ export async function fetchLatestReports(limit = 10) {
 }
 
 export async function fetchFraudTypes() {
-  const response = await fetch('/api/fraud-types');
-  if (!response.ok) throw new Error('Failed to fetch fraud types');
-  return response.json();
+  // The `/api/fraud-types` endpoint was removed in favor of counts.
+  // Return an empty list so frontend falls back to its static type list.
+  return [];
 }
 
-export async function fetchFraudType(slug: string) {
-  const response = await fetch(`/api/fraud-types?slug=${slug}`);
-  if (!response.ok) throw new Error('Failed to fetch fraud type');
-  return response.json();
+export async function fetchFraudType(_slug: string) {
+  // Detailed single-type endpoint removed — return null so callers fallback.
+  return null;
 }
 
 export async function fetchPhoneNumber(number: string) {
