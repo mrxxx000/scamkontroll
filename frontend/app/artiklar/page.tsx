@@ -25,10 +25,16 @@ const articles = [
   },
   {
     title: "Hur återställer du ditt BankID efter ett bedrägeriforsök?",
-    description: "Stegvis guide för att säkra ditt konto om du har varit utsatt för BankID-bluff.",
-    readTime: "8 min",
-    date: "8 dec 2025",
-    category: "Guide"
+    category: "Guide",
+    
+    // content shown when opening the article on top of the page
+    content: [
+      "1. Spärra BankID direkt\n\nOm du misstänker att ditt BankID har blivit utsatt för bedrägeri, kontakta din bank omedelbart och be dem spärra det. Detta gäller både Mobilt BankID och BankID med kort/tangentkod.",
+      "2. Kontakta banken via officiella kanaler\n\nRing aldrig tillbaka till numret som kontaktade dig, använd alltid bankens officiella telefonnummer eller hemsida. Banken kan hjälpa dig återställa BankID och säkra konton.",
+      "3. Kontrollera konton och transaktioner\n\nGranska dina bankkonton och kort noggrant för obehöriga transaktioner. Rapportera misstänkta aktiviteter till banken direkt.",
+      "4. Gör en polisanmälan\n\nOm du blivit utsatt för bedrägeri eller försökt bedrägeri med BankID, gör alltid en polisanmälan. Det hjälper både dig och andra.",
+      "5. Var vaksam framöver\n\nAnvänd BankID endast när du själv initierar det. Godkänn aldrig inloggningar, betalningar eller signeringar via telefon, SMS eller mejl från okända."
+    ]
   },
   {
     title: "PostNord bluff: Så skyddar du dig",
