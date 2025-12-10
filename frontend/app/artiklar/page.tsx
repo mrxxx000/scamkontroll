@@ -104,10 +104,16 @@ const articles = [
   },
   {
     title: "Så verifierar du ett telefonnummer",
-    description: "Enkla steg för att kontrollera om ett nummer är en känd bluff.",
-    readTime: "3 min",
-    date: "4 dec 2025",
-    category: "Guide"
+    category: "Guide",
+    content: [
+      "Så verifierar du ett telefonnummer",
+      "Enkla steg för att kontrollera om ett nummer är en känd bluff.",
+      "1. Sök numret på Scamkontroll\n\nDet snabbaste sättet att ta reda på om ett nummer är en bluff är att söka det direkt på Scamkontroll.\nDär kan du snabbt se:\n• om numret är rapporterat av andra användare\n• vilken typ av bluff det kopplas till\n• hur ofta det förekommer\n• om numret finns i våra varningslistor\n\nDu får en snabb riskbedömning direkt på nummersidan.",
+      "2. Googla numret och jämför resultat\n\nEfter att du sökt numret på Scamkontroll kan du även:\n• kolla Google\n• titta på forum\n• se om numret finns på Hitta eller Eniro\n\nOm flera källor visar att numret är misstänkt → var försiktig.",
+      "3. Kontrollera om numret finns i Scamkontrolls varningar\n\nPå Scamkontroll har du också Varningssidan, där vanliga bluffnummer uppdateras löpande.\nHär kan du se:\n• de senaste rapporterade bluffnumren\n• mönster i bank-, PostNord- och Skatteverket-bluffar\n• vilka nummer som ökar i aktivitet just nu",
+      "4. Bedöm samtalet — Scamkontrolls gyllene regler\n\nÄven om ett nummer inte finns rapporterat, är beteendet avgörande.\nVåra rekommendationer:\n• Ingen seriös aktör ber dig signera BankID spontant\n• Ingen bank stressar dig att agera\n• Myndigheter ringer aldrig och ber om känslig information\n\nVill personen:\n• att du ska logga in\n• godkänna BankID\n• dela bankuppgifter\n\nDå är det nästan alltid en bluff.",
+      "5. Kontrollera avsändaren via officiella kanaler\n\nOm någon säger att de ringer från PostNord, banken eller Skatteverket:\n• Lägg på\n• Gå till deras officiella webbsida\n• Ring kundservice direkt från deras hemsida\n\nPå så sätt kan du verifiera om kontakten var äkta utan risk."
+    ]
   }
 ];
 
@@ -203,13 +209,6 @@ export default function Artiklar() {
                 ) : (
                   article.description && <p className="text-gray-600 text-sm mb-4">{article.description}</p>
                 )}
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div>
-                      {/* show readTime only when article is not opened */}
-                      {activeIndex === index ? null : article.readTime}
-                    </div>
-                  <span>{article.date}</span>
-                </div>
 
                 {/* Läs mer button shown when article is not expanded */}
                 {activeIndex !== index && (
