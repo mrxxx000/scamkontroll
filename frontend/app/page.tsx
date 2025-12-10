@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Shield, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
+import { Search, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { fetchLatestReports, getMostSearched, fetchFraudTypes, fetchFraudType } from '@/lib/api';
@@ -45,11 +45,7 @@ const HeroSection = () => {
 
       <div className="container relative mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm animate-in fade-in">
-            <Shield className="h-4 w-4" />
-            <span>Sveriges mest pålitliga scamkontroll</span>
-          </div>
+          {/* Badge removed per request */}
 
           {/* Title */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight animate-in fade-in">
@@ -89,19 +85,18 @@ const HeroSection = () => {
             </button>
           </form>
 
-          {/* Quick Stats */}
-          <div className="flex flex-wrap justify-center gap-8 pt-8 animate-in fade-in">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold">50,000+</div>
-              <div className="text-sm text-white/70">Rapporterade nummer</div>
+          {/* Quick Stats (replaced with descriptive items) */}
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-8 pt-8 animate-in fade-in">
+            <div className="text-center max-w-xs">
+              <div className="text-lg md:text-xl font-semibold">Stort antal rapporter från användare</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold">100,000+</div>
-              <div className="text-sm text-white/70">Sökningar/månad</div>
+
+            <div className="text-center max-w-xs">
+              <div className="text-lg md:text-xl font-semibold">Aktiv sökfunktion som används dagligen</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold">98%</div>
-              <div className="text-sm text-white/70">Träffsäkerhet</div>
+
+            <div className="text-center max-w-xs">
+              <div className="text-lg md:text-xl font-semibold">Kontinuerligt växande databas</div>
             </div>
           </div>
         </div>
