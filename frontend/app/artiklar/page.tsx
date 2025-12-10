@@ -56,10 +56,34 @@ const articles = [
   },
   {
     title: "Vad gör du om du blir bluffad?",
-    description: "Handlingsplan för om du redan har blivit offer för en bluff eller bedrägeri.",
-    readTime: "7 min",
-    date: "6 dec 2025",
-    category: "Råd"
+    category: "Råd",
+    content: [
+      "Handlingsplan för dig som redan har blivit utsatt för en bluff eller ett bedrägeri",
+      "1. Stoppa allt – agera direkt\n\nSluta klicka, logga in eller prata med bedragaren. Stäng ned SMS, e-post, webbsidan eller telefonsamtalet.",
+      "2. Spärra BankID och kort om något kan ha blivit röjt\n\nOm du på något sätt lämnat ut:\n\nBankID-kod,\nBankuppgifter, \nKortnummer\n eller Loggat in på länk från SMS\n\n→ Ring din bank direkt och spärra BankID och/eller kort.",
+      "3. Byt lösenord och säkra dina konton",
+      "Om du skrivit in information på en misstänkt sida, byt:",
+      "Lösenord till e-post.",
+      "Lösenord till banken.",
+      "Lösenord till sociala medier.",
+      "Alla lösenord som kan vara kopplade till bluffen.",
+      "4. Kontrollera om pengar flyttats\n\nLogga in på banken (via officiell väg) och kontrollera kontoutdrag:",
+      "Okända överföringar?",
+      "Oklara kortbetalningar?",
+      "Nya mottagare i banklistan?",
+      "Rapportera omedelbart till banken om något ser fel ut.",
+      "5. Gör en polisanmälan\n\nPolisen rekommenderar ALLTID att du anmäler bedrägeri eller försök till bedrägeri.",
+       "Det hjälper utredningen och skyddar andra.",
+      "6. Spara bevis",
+      "Spara: SMS, länkar, telefonnummer, skärmbilder, e-post och transaktionsuppgifter. Det hjälper både polisen och banken.",
+      "7. Informera närstående – särskilt äldre\n\nBerätta snabbt för familj eller vänner, så ingen annan luras på samma sätt. Bedragare ringer ofta flera personer i samma familj eller område.",
+      "8. Lär dig känna igen bluffen för framtiden\n\nLäs våra guider om:", 
+      "PostNord-bluff", 
+      "BankID-bedrägerier", 
+      "Telefonbedrägerier", 
+      "Phishing/nätfiske", 
+      "Det gör att du är tryggare nästa gång."
+    ]
   },
   {
     title: "Kryptobedrägerier ökar - var försiktig",
@@ -108,18 +132,42 @@ export default function Artiklar() {
               <h2 className="text-2xl font-bold mb-4">{articles[activeIndex].title}</h2>
               <div className="prose max-w-none text-gray-700">
                 {articles[activeIndex].content?.map((p: string, i: number) => {
-                  // Bold the specific PostNord heading when present
-                  const heading = 'Vad är PostNord-bluffen?';
-                  if (p.startsWith(heading)) {
-                    const rest = p.replace(heading + '\n\n', '');
+                  const blocks = p.split(/\n\n/).filter(Boolean);
+                  return blocks.map((block, bi) => {
+                    const key = `${i}-${bi}`;
+
+                    // If block contains bullet markers, render as list
+                    if (block.includes('•')) {
+                      const lines = block
+                        .split(/\n/)
+                        .map((l) => l.replace(/^•\s?/, '').trim())
+                        .filter(Boolean);
+                      return (
+                        <ul key={key} className="list-disc ml-6 space-y-1">
+                          {lines.map((ln, idx) => (
+                            <li key={idx}>{ln}</li>
+                          ))}
+                        </ul>
+                      );
+                    }
+
+                    // Heuristic: short heading-like blocks -> render bold
+                    const isHeading = /^(Vad är|Så |Tips:|1\.|2\.|3\.|4\.|5\.|6\.|7\.|8\.)/.test(block) && block.length < 120 && !block.includes('\n');
+                    if (isHeading) {
+                      return (
+                        <p key={key}>
+                          <strong>{block}</strong>
+                        </p>
+                      );
+                    }
+
+                    // Default: paragraph
                     return (
-                      <p key={i}>
-                        <strong>{heading}</strong>
-                        {rest ? <><br />{rest}</> : null}
+                      <p key={key}>
+                        {block}
                       </p>
                     );
-                  }
-                  return <p key={i}>{p}</p>;
+                  });
                 })}
               </div>
             </article>
