@@ -525,12 +525,22 @@ const ScamTypesSection = () => {
         // If API returned nothing, fall back to static list (keeps previous behavior)
         if (!data || data.length === 0) {
           data = [
-            { icon: Package, title: 'PostNord bluff', description: 'Falska SMS om paket som kräver avgift eller tullkostnad', href: '/bedrageri/postnord-bluff', reports: 15234, slug: 'postnord-bluff' },
-            { icon: CreditCard, title: 'BankID signering', description: 'Bedragare som lurar dig att signera med BankID', href: '/bedrageri/bankid-bluff', reports: 12456, slug: 'bankid-bluff' },
-            { icon: Building2, title: 'Skatteverket bluff', description: 'Falska meddelanden om skatteåterbäring', href: '/bedrageri/skatteverket-bluff', reports: 8765, slug: 'skatteverket-bluff' },
-            { icon: Smartphone, title: 'Vishing (telefonbedrägerier)', description: 'Samtal från falska banktjänstemän eller myndigheter', href: '/bedrageri/vishing', reports: 7543, slug: 'vishing' },
-            { icon: Mail, title: 'Phishing (nätfiske)', description: 'Falska e-post och SMS med skadliga länkar', href: '/bedrageri/phishing', reports: 6234, slug: 'phishing' },
-            { icon: ShieldAlert, title: 'Försäkringsbedrägerier', description: 'Falska meddelanden från försäkringsbolag', href: '/bedrageri/forsakring-bluff', reports: 4321, slug: 'forsakring-bluff' },
+            { icon: Package, title: 'PostNord bluff', description: 'Falska SMS om paket som kräver avgift eller tullkostnad', href: '/bedrageri/postnord-bluff', reports: 0, slug: 'postnord-bluff' },
+            { icon: CreditCard, title: 'BankID-bedrägeri', description: 'Bedragare som lurar dig att signera med BankID eller kapa konton', href: '/bedrageri/bankid-bluff', reports: 0, slug: 'bankid-bedrageri' },
+            { icon: Building2, title: 'Skatteverket bluff', description: 'Falska meddelanden om skatteåterbäring eller påstådda skulder', href: '/bedrageri/skatteverket-bluff', reports: 0, slug: 'skatteverket-bluff' },
+            { icon: Smartphone, title: 'Vishing (telefonbedrägerier)', description: 'Samtal från falska banktjänstemän eller myndigheter', href: '/bedrageri/vishing', reports: 0, slug: 'vishing' },
+            { icon: Mail, title: 'Smishing (SMS-bedrägeri)', description: 'Falska SMS som länkar till bedrägliga sidor eller betalningar', href: '/bedrageri/smishing', reports: 0, slug: 'smishing' },
+            { icon: ShieldAlert, title: 'Kodkapning', description: 'Kontokapning och obehörig åtkomst via stulna koder eller credentials', href: '/bedrageri/kodkapning', reports: 0, slug: 'kodkapning' },
+            { icon: Mail, title: 'Phishing / falska länkar', description: 'E-post och meddelanden som försöker få dig lämna ut uppgifter via falska sidor', href: '/bedrageri/phishing', reports: 0, slug: 'phishing' },
+            { icon: ShieldAlert, title: 'Investeringsbedrägeri', description: 'Bedrägerier som utger sig för att vara investeringsmöjligheter eller kryptoinvesteringar', href: '/bedrageri/investeringsbedrageri', reports: 0, slug: 'investeringsbedrageri' },
+            { icon: Package, title: 'Tech-support-bedrägeri', description: 'Falsk teknisk support som ber om fjärråtkomst eller betalning', href: '/bedrageri/tech-support', reports: 0, slug: 'tech-support-bedrageri' },
+            { icon: Package, title: 'Blocket / Marketplace-bedrägeri', description: 'Bedrägerier vid köp/sälj på marknadsplatser som Blocket', href: '/bedrageri/marketplace-bedrageri', reports: 0, slug: 'marketplace-bedrageri' },
+            { icon: CreditCard, title: 'Vinstbedrägeri', description: 'Falska vinnarmejl eller meddelanden som kräver betalning för att hämta ut pris', href: '/bedrageri/vinstbedrageri', reports: 0, slug: 'vinstbedrageri' },
+            { icon: CreditCard, title: 'Fakturabedrägeri', description: 'Falska fakturor som försöker få företag eller privatpersoner att betala', href: '/bedrageri/fakturabedrageri', reports: 0, slug: 'fakturabedrageri' },
+            { icon: ShieldAlert, title: 'Romance scam', description: 'Bedrägerier som sker via dejtingsidor eller sociala kontakter för att lura pengar', href: '/bedrageri/romance-scam', reports: 0, slug: 'romance-scam' },
+            { icon: ShieldAlert, title: 'Jobb- eller hyresbedrägeri', description: 'Falska jobb- eller hyresannonser som kräver förskottsbetalning eller personlig information', href: '/bedrageri/jobb-hyres-bedrageri', reports: 0, slug: 'jobb-hyres-bedrageri' },
+            { icon: ShieldAlert, title: 'Identitetsstöld', description: 'Stulna identiteter eller information som används för bedrägerier', href: '/bedrageri/identitetsstod', reports: 0, slug: 'identitetsstold' },
+            { icon: Phone, title: 'Ping call / Wangiri', description: 'Kort samtal eller missade samtal avsiktligt för att få dig ringa tillbaka', href: '/bedrageri/ping-call', reports: 0, slug: 'ping-call' },
           ];
         }
 
