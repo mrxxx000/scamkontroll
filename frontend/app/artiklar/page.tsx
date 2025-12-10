@@ -87,10 +87,20 @@ const articles = [
   },
   {
     title: "Kryptobedrägerier ökar - var försiktig",
-    description: "Ny rapport visar ökning i kryptorelaterade bedrägerier. Så skyddar du dig.",
-    readTime: "4 min",
-    date: "5 dec 2025",
-    category: "Varning"
+    category: "Varning",
+    content: [
+      "Så skyddar du dig mot kryptobedrägerier",
+      "Här är konkreta råd du kan följa om du överväger krypto-investering eller bara vill vara säker:",
+      "• Var skeptisk mot “för bra för att vara sant”-löften. Höga, garanterade vinster är en vanlig varningssignal. Seriösa investeringar kräver tid och förutsätter risk.",
+      "• Verifiera källan noggrant. Använd bara välkända och etablerade kryptobörser eller plånböcker. Kontrollera att webbadress, ägare och användarvillkor stämmer och undvik kopior och fejk-sajter.",
+      "• Klicka aldrig på länkar via mejl, sociala medier eller meddelanden från okända. Många bluffar börjar med phishing-sidor som försöker stjäla inloggningsuppgifter eller privata nycklar.",
+      "• Lämna aldrig ut din “private key” eller seed phrase. Det är nyckeln till din kryptoplånbok och dela den aldrig med någon, inte ens med “support” som påstår att de hjälper dig.",
+      "• Om du investerar, använd 2FA och säkra lösenord. Tvåfaktorsautentisering, helst via app (inte SMS), ökar säkerheten och spär på skyddet om någonting går fel.",
+      "• Var extra försiktig med erbjudanden på sociala medier eller via okända kontakter. Många kryptobedrägerier börjar med kontakt på t.ex. Facebook, YouTube eller i grupper — ofta med falska löften om stora vinster.",
+      "• Om något känns fel, gå ur eller vänta. Ta dig tid att tänka igenom investeringen. Seriösa plattformar kräver inte att du “bestämmer dig nu.”",
+      "Rekommenderad call-to-action för din sida",
+      "Tänk dig för innan du investerar i kryptovaluta och använd sunda metoder för att skydda dig. Om du någonsin känner dig tveksam: backa — och kolla gärna fler guider och råd här på sajten."
+    ]
   },
   {
     title: "Så verifierar du ett telefonnummer",
