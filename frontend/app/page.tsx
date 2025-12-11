@@ -85,6 +85,13 @@ const HeroSection = () => {
             >
               Kontrollera
             </button>
+            {/* Mobile-only report button: appears under the main button on small screens */}
+            <a
+              href="/rapportera"
+              className="mt-2 sm:hidden w-full inline-flex items-center justify-center px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-red-300"
+            >
+              Rapportera bluff
+            </a>
           </form>
 
           {/* Quick Stats (replaced with descriptive items) */}
