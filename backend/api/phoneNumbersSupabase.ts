@@ -64,7 +64,7 @@ export async function addReport(phoneNumber: string, reportData: any) {
     // Get phone number ID first
     const { data: phoneData, error: phoneError } = await supabase
       .from('phone_numbers')
-      .select('id')
+      .select('id, total_reports')
       .eq('number', phoneNumber)
       .single();
 
