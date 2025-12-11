@@ -782,6 +782,7 @@ export default function Home() {
       <HeroSection />
       <LatestScams />
       <MostSearchedNumbers />
+      <PopularScamNumbers />
       <ScamTypesSection />
       <WarningsSection />
       <Footer />
