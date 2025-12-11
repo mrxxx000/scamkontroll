@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { AlertTriangle, Phone, Clock, ThumbsUp, SendHorizontal, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, Clock, ThumbsUp, SendHorizontal, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
