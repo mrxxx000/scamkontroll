@@ -203,13 +203,8 @@ export default function Artiklar() {
                   <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">{article.category}</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{article.title}</h3>
-                {/* Show a single-tip preview when article has content and is not opened yet */}
-                {article.content ? (
-                  <p className="text-gray-600 text-sm mb-4">{article.content[0]}</p>
-                ) : (
-                  article.description && <p className="text-gray-600 text-sm mb-4">{article.description}</p>
-                )}
-
+                {/* Always show first content item as preview */}
+                <p className="text-gray-600 text-sm mb-4">{article.content[0]}</p>
                 {/* Läs mer button shown when article is not expanded */}
                 {activeIndex !== index && (
                   <div className="mt-3">
