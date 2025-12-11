@@ -59,7 +59,12 @@ function calculateRiskLevel(searchCount: number): { level: string; percentage: n
 // frontend can call this API.
 const CORS_ORIGINS = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
-  : ['https://scamkontroll.vercel.app'];
+  : [
+      'https://scamkontroll.vercel.app',
+      'https://scamkontroll.xyz',
+      'https://www.scamkontroll.xyz',
+      'http://localhost:3000',
+    ];
 
 // Helper to check origin against configured patterns.
 // Supports:
