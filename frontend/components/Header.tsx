@@ -1,6 +1,6 @@
 'use client';
 
-import { Shield, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -17,10 +17,15 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white transition-transform group-hover:scale-105">
-            <Shield className="h-5 w-5" />
-          </div>
+        <Link href="/" className="flex items-center gap-2 group" aria-label="Hem">
+          <img
+            src="/favicon_io/favicon-32x32.png"
+            alt="Scamkontroll"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-lg bg-blue-600 p-1 transition-transform group-hover:scale-105 shadow"
+            style={{ objectFit: 'contain', background: 'white' }}
+          />
           <span className="text-xl font-bold text-gray-900">Scamkontroll</span>
         </Link>
 
