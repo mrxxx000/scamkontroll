@@ -530,7 +530,7 @@ const ScamTypesSection = () => {
             { icon: Mail, title: 'Phishing / falska länkar', description: 'E-post och meddelanden som försöker få dig lämna ut uppgifter via falska sidor', href: '/bedrageri/phishing', reports: 0, slug: 'phishing' },
             { icon: ShieldAlert, title: 'Investeringsbedrägeri', description: 'Bedrägerier som utger sig för att vara investeringsmöjligheter eller kryptoinvesteringar', href: '/bedrageri/investeringsbedrageri', reports: 0, slug: 'investeringsbedrageri' },
             { icon: Package, title: 'Tech-support-bedrägeri', description: 'Falsk teknisk support som ber om fjärråtkomst eller betalning', href: '/bedrageri/tech-support', reports: 0, slug: 'tech-support-bedrageri' },
-            { icon: Package, title: 'Blocket / Marketplace-bedrägeri', description: 'Bedrägerier vid köp/sälj på marknadsplatser som Blocket', href: '/bedrageri/marketplace-bedrageri', reports: 0, slug: 'marketplace-bedrageri' },
+            { icon: Package, title: 'Blocket / Marketplace-bedrageri', description: 'Bedrägerier vid köp/sälj på marknadsplatser som Blocket', href: '/bedrageri/marketplace-bedrageri', reports: 0, slug: 'marketplace-bedrageri' },
             { icon: CreditCard, title: 'Vinstbedrägeri', description: 'Falska vinnarmejl eller meddelanden som kräver betalning för att hämta ut pris', href: '/bedrageri/vinstbedrageri', reports: 0, slug: 'vinstbedrageri' },
             { icon: CreditCard, title: 'Fakturabedrägeri', description: 'Falska fakturor som försöker få företag eller privatpersoner att betala', href: '/bedrageri/fakturabedrageri', reports: 0, slug: 'fakturabedrageri' },
             { icon: ShieldAlert, title: 'Romance scam', description: 'Bedrägerier som sker via dejtingsidor eller sociala kontakter för att lura pengar', href: '/bedrageri/romance-scam', reports: 0, slug: 'romance-scam' },
@@ -596,14 +596,14 @@ const ScamTypesSection = () => {
     setReportsLoading(true);
     setTypeReports([]);
 
-    // Determine slug to fetch details (prefer slug property)
-    const slug = scam.slug || (scam.href ? scam.href.replace('/bedrageri/', '') : undefined);
+    // Use the actual type string for backend request
+    const type = scam.title || scam.type || scam.slug;
 
     try {
       let data: any = null;
-      if (slug) {
+      if (type) {
         try {
-          data = await fetchFraudType(slug);
+          data = await fetchFraudType(type); // Pass type, not slug
         } catch (e) {
           console.warn('fetchFraudType failed', e);
         }
@@ -613,7 +613,6 @@ const ScamTypesSection = () => {
       if (data && data.reports) {
         setTypeReports(data.reports);
       } else {
-        // Detailed per-type reports endpoint was removed; no detailed reports available here.
         setTypeReports([]);
       }
     } finally {
