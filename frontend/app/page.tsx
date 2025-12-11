@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, TrendingUp, ExternalLink } from 'lucide-react';
+import { Search, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { fetchLatestReports, getMostSearched, fetchFraudTypes, fetchFraudType } from '@/lib/api';
@@ -272,108 +272,7 @@ const LatestScams = () => {
   );
 };
 
-// Popular Scam Numbers Component
-const PopularScamNumbers = () => {
-  const [trending, setTrending] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTrending = async () => {
-      try {
-        const res = await fetch('/api/trending?limit=10');
-        if (!res.ok) throw new Error('Failed to fetch trending numbers');
-        const data = await res.json();
-        setTrending(data);
-      } catch (err) {
-        console.error('Error fetching trending:', err);
-        setError('Could not load trending numbers');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTrending();
-  }, []);
-
-  return (
-    <section className="py-16 md:py-24 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground">Mest sökta bluffnummer</h2>
-          <p className="text-gray-600 mt-2">Nummer som svenskar söker på mest just nu</p>
-        </div>
-
-        {/* Disclaimer */}
-        <div className="mb-8 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
-          <p>
-            <strong>Observera:</strong> Informationen på denna sida är baserad på användarrapporter och offentliga källor.
-            Den är inte 100 % korrekt och vissa nummer kan vara felaktigt markerade.
-            Gör alltid en egen bedömning och lämna aldrig ut känsliga uppgifter.
-          </p>
-        </div>
-
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center gap-2 text-gray-600">
-              <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              Laddar trendande nummer...
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
-            {error}
-          </div>
-        )}
-
-        {!loading && trending.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {trending.map((item: any, index: number) => {
-              const phone = item.numbers?.phone || 'Okänt nummer';
-              const searchesToday = item.searches_today || 0;
-              const delta = item.delta || 0;
-
-              return (
-                <a
-                  key={`${item.id}-${index}`}
-                  href={`/nummer/${phone.replace(/\D/g, '')}`}
-                  className="group flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:shadow-md transition-all duration-200"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-sm font-bold shrink-0">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-mono font-semibold text-foreground group-hover:text-blue-600 transition-colors">
-                      +46{phone}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Phone className="h-3 w-3" />
-                      <span>{searchesToday.toLocaleString('sv-SE')} sökningar</span>
-                    </div>
-                  </div>
-                  {delta > 0 && (
-                    <div className="flex items-center gap-1 text-sm font-medium text-green-600 shrink-0">
-                      <TrendingUp className="h-4 w-4" />
-                      +{delta}%
-                    </div>
-                  )}
-                </a>
-              );
-            })}
-          </div>
-        )}
-
-        {!loading && trending.length === 0 && !error && (
-          <div className="text-center py-12 text-gray-600">
-            Inga trendande nummer än.
-          </div>
-        )}
-      </div>
-    </section>
-  );
-};
+// PopularScamNumbers removed: using `MostSearchedNumbers` (real data) instead
 
 // Most Searched Numbers Component  
 const MostSearchedNumbers = () => {
