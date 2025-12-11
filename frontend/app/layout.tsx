@@ -58,6 +58,19 @@ export default function RootLayout({
         <meta property="og:image:width" content="512" />
         <meta property="og:image:height" content="512" />
         <meta property="og:image:alt" content="Scamkontroll logotyp" />
+        {/* Organization structured data for Google logo in search results */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Scamkontroll',
+              url: 'https://scamkontroll.xyz',
+              logo: 'https://scamkontroll.xyz/favicon_io/android-chrome-512x512.png',
+            }),
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>
