@@ -54,7 +54,25 @@ function calculateRiskLevel(searchCount: number): { level: string; percentage: n
 }
 
 // Middleware
-app.use(cors());
+// Configure allowed origins for CORS. Set `CORS_ORIGINS` in the environment
+// (comma-separated). Defaults to the Vercel frontend domain so the deployed
+// frontend can call this API.
+const CORS_ORIGINS = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim())
+  : ['https://scamkontroll.vercel.app'];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. server-to-server, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (CORS_ORIGINS.indexOf(origin) !== -1) return callback(null, true);
+      return callback(new Error('CORS policy: Origin not allowed'));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Health check

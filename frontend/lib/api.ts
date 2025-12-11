@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export async function fetchLatestReports(limit = 10) {
   try {
@@ -92,7 +92,7 @@ export async function getMostSearched(limit = 10) {
 }
 
 export async function submitContact(name: string, email: string, subject: string, message: string) {
-  const response = await fetch('/api/contacts', {
+  const response = await fetch(`${API_BASE}/api/contacts`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email, subject, message }),

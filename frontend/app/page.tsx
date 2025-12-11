@@ -6,6 +6,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { fetchLatestReports, getMostSearched, fetchFraudTypes, fetchFraudType } from '@/lib/api';
 import { getIconForType } from '@/lib/fraudTypeIcons';
+// Use NEXT_PUBLIC_API_URL to configure backend location (falls back to empty string so relative paths still work)
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Hero Section Component
 const HeroSection = () => {
@@ -441,7 +443,7 @@ const ScamTypesSection = () => {
 
         // Fetch counts from backend proxy and merge into types
         try {
-          const countsRes = await fetch('/api/fraud-type-counts');
+          const countsRes = await fetch(`${API_BASE}/api/fraud-type-counts`);
             if (countsRes.ok) {
               const countsData: Array<{ type: string; count: number }> = await countsRes.json();
               // build lookup by original type string
