@@ -58,15 +58,52 @@ function calculateRiskLevel(searchCount: number): { level: string; percentage: n
 // (comma-separated). Defaults to the Vercel frontend domain so the deployed
 // frontend can call this API.
 const CORS_ORIGINS = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim())
+  ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
   : ['https://scamkontroll.vercel.app'];
+
+// Helper to check origin against configured patterns.
+// Supports:
+// - exact origins: https://example.com
+// - host suffixes: .vercel.app or vercel.app
+// - wildcard patterns: https://*.vercel.app or *.vercel.app
+// - literal '*' to allow all
+function isOriginAllowed(origin: string | undefined) {
+  if (!origin) return true; // allow non-browser requests
+  const o = origin.toLowerCase();
+
+  for (const patternRaw of CORS_ORIGINS) {
+    const pattern = patternRaw.toLowerCase();
+    if (pattern === '*') return true;
+
+    // If pattern contains a '*' treat as a simple glob
+    if (pattern.includes('*')) {
+      // Escape regex special chars except '*'
+      const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*');
+      const re = new RegExp('^' + escaped + '$');
+      if (re.test(o)) return true;
+      continue;
+    }
+
+    // If pattern is a bare host or starts with a dot, allow suffix matches
+    if (!pattern.includes('://')) {
+      // allow origins that end with the pattern, e.g. 'vercel.app' or '.vercel.app'
+      if (o.endsWith(pattern)) return true;
+      continue;
+    }
+
+    // Otherwise compare exact origin
+    if (o === pattern) return true;
+  }
+
+  return false;
+}
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. server-to-server, curl, Postman)
-      if (!origin) return callback(null, true);
-      if (CORS_ORIGINS.indexOf(origin) !== -1) return callback(null, true);
+      // Log origin and allowed patterns for debugging when running on Render
+      console.debug('CORS check — origin:', origin, 'allowed:', CORS_ORIGINS);
+      if (isOriginAllowed(origin)) return callback(null, true);
       return callback(new Error('CORS policy: Origin not allowed'));
     },
     credentials: true,
