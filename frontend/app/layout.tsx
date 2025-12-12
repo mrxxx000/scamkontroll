@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description: 'Sök bluffnummer och få varningar om telefonbedrägerier i Sverige',
     images: [
       {
-        url: '/logo/logo-512.png',
+        url: '/logo.png',
         width: 512,
         height: 512,
         alt: 'Scamkontroll logotyp',

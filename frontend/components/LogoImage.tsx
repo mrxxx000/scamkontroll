@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 
 export default function LogoImage() {
-  // Only include the files you actually have
+  // List of images to try
   const fallbacks = [
-    '/logo/logo.png', // your main logo
+    '/logo.png', // main logo
     '/favicon_io/android-chrome-512x512.png',
     '/favicon_io/android-chrome-192x192.png',
   ];
@@ -24,14 +24,10 @@ export default function LogoImage() {
 
     (async () => {
       for (const candidate of fallbacks) {
-        try {
-          const ok = await checkImage(candidate);
-          if (ok && mounted) {
-            setSrc(candidate);
-            break;
-          }
-        } catch {
-          // ignore errors
+        const ok = await checkImage(candidate);
+        if (ok && mounted) {
+          setSrc(candidate);
+          break;
         }
       }
       if (mounted) setChecking(false);
@@ -42,27 +38,34 @@ export default function LogoImage() {
     };
   }, []);
 
-  if (checking) return <div className="mx-auto mb-2 w-[140px] h-[140px]" aria-hidden />;
-
-  if (!src) {
-    // fallback text if no image found
+  // While checking, show a visible placeholder
+  if (checking) {
     return (
-      <div className="mx-auto mb-2 text-center text-sm text-white/90">
-        <span>Scamkontroll</span>
+      <div className="mx-auto mb-2 w-[140px] h-[140px] bg-gray-200 flex items-center justify-center rounded-lg shadow">
+        <span className="text-gray-600">Loading...</span>
       </div>
     );
   }
 
+  // If no image found, show a visible fallback
+  if (!src) {
+    return (
+      <div className="mx-auto mb-2 w-[140px] h-[140px] bg-yellow-200 flex items-center justify-center rounded-lg shadow-lg">
+        <span className="text-black font-bold">Scamkontroll</span>
+      </div>
+    );
+  }
+
+  // Render the image if found
   return (
-    <div className="mx-auto mb-2 rounded-lg shadow-lg">
+    <div className="mx-auto mb-2 w-[140px] h-[140px] rounded-lg shadow-lg bg-white flex items-center justify-center">
       <img
         src={src}
         alt="Scamkontroll logotyp"
         width={140}
         height={140}
         decoding="async"
-        className="mx-auto rounded-lg"
-        style={{ objectFit: 'contain' }}
+        className="rounded-lg object-contain"
       />
     </div>
   );
