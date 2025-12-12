@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: "Scamkontroll - Sveriges största scam-databas",
@@ -37,9 +38,10 @@ export default function RootLayout({
         {
           // Use a runtime value inserted at build time by Next.js environment variables
         }
-        <script
-          async
+        {/* Load AdSense on the client only to avoid SSR/client ordering mismatches */}
+        <Script
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-9726025514115935'}`}
+          strategy="afterInteractive"
           crossOrigin="anonymous"
         />
         <link rel="icon" href="/favicon_io/favicon.ico" sizes="any" />

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Search, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import LogoImage from '@/components/LogoImage';
 import { fetchLatestReports, getMostSearched, fetchFraudTypes, fetchFraudType } from '@/lib/api';
 import { getIconForType } from '@/lib/fraudTypeIcons';
 // Use NEXT_PUBLIC_API_URL to configure backend location (falls back to empty string so relative paths still work)
@@ -703,23 +704,4 @@ export default function Home() {
   );
 }
 
-// Small component that attempts to load the preferred logo in /public/logo/
-function LogoImage() {
-  const [src, setSrc] = useState('/logo/logo-120.png');
-
-  return (
-    <div className="mx-auto mb-2 rounded-lg shadow-lg">
-      <Image
-        src={src}
-        alt="Scamkontroll logotyp"
-        width={140}
-        height={140}
-        priority
-        onError={() => {
-          if (src !== '/logo.png') setSrc('/logo.png');
-        }}
-        style={{ objectFit: 'contain' }}
-      />
-    </div>
-  );
-}
+// LogoImage moved to a shared component at `frontend/components/LogoImage.tsx`
