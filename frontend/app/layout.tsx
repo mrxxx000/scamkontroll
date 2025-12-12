@@ -32,6 +32,16 @@ export default function RootLayout({
   return (
     <html lang="sv">
       <head>
+        {/* Google AdSense - include when NEXT_PUBLIC_ADSENSE_CLIENT is set */}
+        {/* Set NEXT_PUBLIC_ADSENSE_CLIENT in Vercel or .env.local to enable ads */}
+        {
+          // Use a runtime value inserted at build time by Next.js environment variables
+        }
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-9726025514115935'}`}
+          crossOrigin="anonymous"
+        />
         <link rel="icon" href="/favicon_io/favicon.ico" sizes="any" />
         <link
           rel="icon"
