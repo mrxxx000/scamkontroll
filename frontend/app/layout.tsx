@@ -78,8 +78,8 @@ export default function RootLayout({
               '@type': 'Organization',
               name: 'Scamkontroll',
               url: 'https://scamkontroll.xyz',
-              logo: 'https://scamkontroll.xyz/logo/logo-512.png',
-              image: 'https://scamkontroll.xyz/logo/logo-512.png',
+              logo: 'https://scamkontroll.xyz/logo/android-chrome-512x512.png',
+              image: 'https://scamkontroll.xyz/logo/android-chrome-512x512.png',
             }),
           }}
         />

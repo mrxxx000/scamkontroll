@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 export default function LogoImage() {
   // List of images to try
   const fallbacks = [
-    '/logo.png', // main logo
+    '/logo/android-chrome-192x192.png', // main logo
     '/favicon_io/android-chrome-512x512.png',
     '/favicon_io/android-chrome-192x192.png',
   ];
