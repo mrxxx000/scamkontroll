@@ -47,6 +47,15 @@ const HeroSection = () => {
 
       <div className="container relative mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-3xl mx-auto text-center space-y-8">
+          {/* Visible logo for Google and branding (helps Google detect site logo) */}
+          <img
+            src="/logo.png"
+            alt="Scamkontroll logotyp"
+            width={140}
+            height={140}
+            className="mx-auto mb-2 rounded-lg shadow-lg"
+            style={{ objectFit: 'contain' }}
+          />
           {/* Badge removed per request */}
 
           {/* Title */}
