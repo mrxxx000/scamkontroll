@@ -1,6 +1,5 @@
 "use client";
 
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Search, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
