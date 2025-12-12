@@ -122,6 +122,17 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Backend is running' });
 });
 
+// Lightweight ping endpoint for uptime monitors (Uptime Robot) and external checks
+app.get('/api/ping', (req: Request, res: Response) => {
+  try {
+    console.log('✅ /api/ping received');
+    return res.json({ success: true, message: 'pong', timestamp: new Date().toISOString() });
+  } catch (err) {
+    console.error('Error handling /api/ping', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // Numbers Routes - Define specific routes BEFORE generic :phone route
 // Get latest reported scams (for homepage)
 app.get('/api/numbers/reports/latest', async (req: Request, res: Response) => {
