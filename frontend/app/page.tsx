@@ -1,5 +1,6 @@
-'use client';
+"use client";
 
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Search, AlertTriangle, Package, CreditCard, Building2, Smartphone, Mail, ShieldAlert, Phone, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
@@ -12,6 +13,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 // Hero Section Component
 const HeroSection = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  // LogoImage fallback handled in a small component below
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -48,14 +51,8 @@ const HeroSection = () => {
       <div className="container relative mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           {/* Visible logo for Google and branding (helps Google detect site logo) */}
-          <img
-            src="/logo.png"
-            alt="Scamkontroll logotyp"
-            width={140}
-            height={140}
-            className="mx-auto mb-2 rounded-lg shadow-lg"
-            style={{ objectFit: 'contain' }}
-          />
+          {/* Try the structured logo path first, fall back to /logo.png if missing */}
+          <LogoImage />
           {/* Badge removed per request */}
 
           {/* Title */}
@@ -703,5 +700,26 @@ export default function Home() {
       <WarningsSection />
       <Footer />
     </>
+  );
+}
+
+// Small component that attempts to load the preferred logo in /public/logo/
+function LogoImage() {
+  const [src, setSrc] = useState('/logo/logo-120.png');
+
+  return (
+    <div className="mx-auto mb-2 rounded-lg shadow-lg">
+      <Image
+        src={src}
+        alt="Scamkontroll logotyp"
+        width={140}
+        height={140}
+        priority
+        onError={() => {
+          if (src !== '/logo.png') setSrc('/logo.png');
+        }}
+        style={{ objectFit: 'contain' }}
+      />
+    </div>
   );
 }
